@@ -15,15 +15,14 @@ TheAnalysis <- function(id, data.dpath, alignment.table, taxa.table, run.options
   for (a in 1:length(alignment.table)) {
     row <- alignment.table[[a]]
     stopifnot(is.list(row))
-    stopifnot(length(row)==5)
+    stopifnot(length(row)==4)
     stopifnot(names(row)[[1]]=="file")
     stopifnot(names(row)[[2]]=="gtree")
     stopifnot(names(row)[[3]]=="clock")
-    stopifnot(names(row)[[4]]=="subst")
-    stopifnot(names(row)[[5]]=="site")
+    stopifnot(names(row)[[4]]=="siteM")
 
-    locus <- c(kind="Locus", id=names(alignment.table)[a], row)
-    aug.alignments <- c(aug.alignments, list(locus))
+    partition <- c(kind="Partition", id=names(alignment.table)[a], row)
+    aug.alignments <- c(aug.alignments, list(partition))
   }
   TheAnalysisStructure <<- list(kind="TheAnalysisStructure",
                                 id=id, 
@@ -32,10 +31,6 @@ TheAnalysis <- function(id, data.dpath, alignment.table, taxa.table, run.options
                                 taxa.table=list(kind="TaxaTable", id="taxa.table", taxa.table=taxa.table),
                                 run.options=list(kind="RunOptions", id="run.options", run.options=run.options)
                                 )
-  
-  for (i in 1:nof.alignments()) {
-    Gtree(paste(i), SMCtree("smctree"))
-  }
 }
 
 
@@ -177,6 +172,11 @@ insert  <- function(x) {
 
 real.kids <- function(x) {
   stopifnot(is.list(x))
+  
+  if (length(x) <= 2) {
+    browser()
+  }
+  
   stopifnot(length(x) > 2)
   rk <- FALSE
   rk2 <- TRUE
@@ -226,8 +226,8 @@ make.ki <- function(A, kinds, ids) {
 
 
 
-Gtree <- function(id, prior=NULL) {
-  x <- list(kind="Gtree", id=id, prior=prior)
+Gtree <- function(id, prior=NULL, branchRM=NULL) {
+  x <- list(kind="Gtree", id=id, prior=prior, branchRM=branchRM)
   if (real.kids(x)) {
     insert(x)  
   }
@@ -245,8 +245,8 @@ SMCtree <- function(id, branching=NULL, smccoal=NULL) {
 
 
 
-BDCPrior <- function(id, growthrate=NULL, reldeath=NULL, w=NULL, eps=NULL) {
-  x <- list(kind="BDCPrior", id=id, growthrate=growthrate, reldeath=reldeath, w=w, eps=eps)
+BDCPrior <- function(id, growthrate=NULL, reldeath=NULL, w=NULL, ohID=NULL, eps=NULL) {
+  x <- list(kind="BDCPrior", id=id, growthrate=growthrate, reldeath=reldeath, w=w, ohID=ohID, eps=eps)
   if (real.kids(x)) {
     insert(x)  
   }
@@ -265,6 +265,24 @@ SMCCoalescent <- function(id, invgammamix=NULL, popSF=NULL) {
 
 
 
+BranchRM <- function(id, model=NULL) {
+  x <- list(kind="BranchRM", id=id, model=model)
+  if (real.kids(x)) {
+    insert(x)  
+  }
+  invisible(x)
+}
+
+
+StrictClock <- function(id, rate=NULL) {
+  x <- list(kind="StrictClock", id=id, rate=rate)
+  if (real.kids(x)) {
+    insert(x)  
+  }
+  invisible(x)
+}
+
+
 Clock <- function(id, clock=NULL) {
   x <- list(kind="Clock", id=id, clock=clock)
   if (real.kids(x)) {
@@ -275,13 +293,27 @@ Clock <- function(id, clock=NULL) {
 
 
 
-StrictClock <- function(id, rate=NULL) {
-  x <- list(kind="StrictClock", id=id, rate=rate)
+PartitionRate <- function(id, rate=NULL) {
+  x <- list(kind="PartitionRate", id=id, rate=rate)
   if (real.kids(x)) {
     insert(x)  
   }
   invisible(x)
   }
+
+
+
+
+
+
+
+SiteModel <- function(id, subst=NULL, site=NULL) {
+  x <- list(kind="SiteModel", id=id, subst=subst, site=site)
+  if (real.kids(x)) {
+    insert(x)  
+  }
+  invisible(x)
+}
 
 
 
@@ -363,5 +395,19 @@ Dirichlet <- function(id, mean=NULL, alpha=NULL) {
   }
   invisible(x)
 }
+
+
+
+UniformUnitSimplex <- function(id, N=NULL) {
+  x <- list(kind="UniformUnitSimplex", id=id, N=N)
+  if (real.kids(x)) {
+    insert(x)  
+  }
+  invisible(x)
+}
+
+
+
+
 
 

@@ -1,21 +1,12 @@
-
 setwd("C:/Users/Work/AAA/Programming/biology/STACEY_XML")
 source("user-input-lib.r")
 source("STACEYxml-lib.r")
 
-
-
-
-#################################### DATA  #####################################
-
-
-
 alignment.table <- list(
-locus1=list(file="xxx.nex", gtree=Gtree("1"), clock=Clock("1"),     subst=Subst("1"),     site=SiteHet("all")),
-locus2=list(file="yyy.nex", gtree=Gtree("2"), clock=Clock("2and3"), subst=Subst("2and3"), site=SiteHet("all")),
-locus3=list(file="zzz.nex", gtree=Gtree("3"), clock=Clock("2and3"), subst=Subst("2and3"), site=SiteHet("all"))
+  partition1=list(file="xxx.nex", gtree=Gtree("1"), clock=Clock("1"),     siteM=SiteModel("1")),
+  partition2=list(file="yyy.nex", gtree=Gtree("2"), clock=Clock("2and3"), siteM=SiteModel("2and3")),
+  partition3=list(file="zzz.nex", gtree=Gtree("3"), clock=Clock("2and3"), siteM=SiteModel("2and3"))
 )
-
 
 taxa.table <- rbind(
 c("a1", "a"),
@@ -25,8 +16,6 @@ c("b1", "b"),
 c("b2", "b")
 )
 colnames(taxa.table) <- c("taxon", "mincluster")
-
-###################################### RUN #####################################
 
 run.options <- list(
   sampledgtrees.fpathbase="gtrees",
@@ -38,21 +27,25 @@ run.options <- list(
   smctree.logevery=1000,
   gtrees.logevery=1000,
   screen.logevery=10000
-  )
-          
-
-################################ ANALYSIS STRUCTURE ############################
-
-
+  )          
 TheAnalysis("Test.1", data.dpath="C:/...", alignment.table, taxa.table, run.options)
 
+########################################
 
-####################################  MODEL  ###################################
+gtrees <- get.gtrees()
+for (i in 1:length(gtrees)) {
+  id <- gtrees[[i]]$id
+  Gtree(id, SMCtree("smctree"), BranchRM(id))
+  BranchRM(id, StrictClock(id))
+  StrictClock(id, 1.0)
+}
+
 
 SMCtree("smctree", BDCPrior("smctree"), SMCCoalescent("staceycoal"))
 BDCPrior("smctree", growthrate=LogNorm("smctree.g"), 
          reldeath=Uniform("smctree.rd"), 
          w=Uniform("smctree.w"), 
+         ohID="origin.height",
          eps=0.00003)
 LogNorm("smctree.g", 4.6, 2)
 Uniform("smctree.rd", 0, 1)
@@ -62,31 +55,34 @@ LogNorm("popSF", -7, 2)
 InvGammaMix("popBV", weights=c(0.5,0.5), alphas=c(3,3), betas=c(1.5,2.5))
 
 
-Clock("1", StrictClock("1"))
-StrictClock("1", 1.0)
-Clock("2and3", StrictClock("2and3"))
-StrictClock("2and3", LogNorm("clock.2and3"))
+Clock("1", PartitionRate("1"))
+PartitionRate("1", 1.0)
+Clock("2and3", PartitionRate("2and3"))
+PartitionRate("2and3", LogNorm("clock.2and3"))
 LogNorm("clock.2and3",0,1)
 
+SiteModel("1", Subst("1"), SiteHet("1"))
+SiteModel("2and3", Subst("2and3"), SiteHet("2and3"))
+SiteHet("1", "None")
+SiteHet("2and3")
+SiteHet("2and3", "None")
 Subst("1", HKY("1"))
-HKY("1", Dirichlet("hky.1.freqs"), LogNorm("hky.kappa"))
-Dirichlet("hky.1.freqs", rep(0.25,4), 1.0)
+HKY("1", UniformUnitSimplex("hky.1.freqs"), LogNorm("hky.kappa"))
+UniformUnitSimplex("hky.1.freqs", 3)
 Subst("2and3", HKY("2and3"))
-HKY("2and3", Dirichlet("hky.2and3.freqs"), LogNorm("hky.kappa"))
-Dirichlet("hky.2and3.freqs", rep(0.25,4), 1.0)
+HKY("2and3", UniformUnitSimplex("hky.2and3.freqs"), LogNorm("hky.kappa"))
+UniformUnitSimplex("hky.2and3.freqs", 3)
 LogNorm("hky.kappa",1,1.25)
+
+
+xmlTree.from.analysis.structure(TheAnalysisStructure)
+saveXML(TheSTACEYxmlTree$value(), file="test.xml")
 
 
 sink(file="test.txt")
 str(TheAnalysisStructure)
 sink(NULL)
 
-
-xmlTree.from.analysis.structure(TheAnalysisStructure)
-
-saveXML(TheSTACEYxmlTree$value(), file="test.xml")
-
-ki <- make.ki(TheAnalysisStructure,  character(0),  character(0))
-cbind(ki$kinds, ki$ids)
+str(TheAnalysisStructure$alignment.table$alignments[[1]]$gtree$prior)
 
 

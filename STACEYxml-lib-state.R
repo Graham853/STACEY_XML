@@ -41,16 +41,18 @@ add.state <- function(A) {
   value <- ifelse(psf$kind == "FixedValue", psf$par1, "0.02")
   add.node("parameter", attrs=c(id=popSFID(), name="stateNode", lower="1.0E-99", upper="1.0E99"), .children=value)
   
-  add.comment("The gene trees")
-  for (g in 1:nof.alignments()) {
+  add.comment("The trees for each locus")
+  gtrees <- get.gtrees()
+  for (g in 1:length(gtrees)) {
     add.comment(paste0("Gene tree ", g))
-    add.opennode("tree", attrs=c(id=geneTreeID(g), name="stateNode"))
-    add.opennode("tree", attrs=c(id=geneTaxonSetID(g), spec="TaxonSet"))
-    add.node("data", attrs=c(idref=alignmentID(g), name="alignment"))
+    add.opennode("tree", attrs=c(id=geneTreeID.g(g), name="stateNode"))
+    add.opennode("tree", attrs=c(id=geneTaxonSetID.g(g), spec="TaxonSet"))
+    add.node("data", attrs=c(idref=gtreedataID.g(g), name="alignment"))
+    #TODO don't understand the data refereence when trees are linked.
     add.closetag()
     add.closetag()
   }  
-  add.comment("The gene tree clock rates, omitting first")
+  add.comment("The partition clock rates, omitting first")
   # TODO this just does strict clock
   clocks <- get.clocks()
   if (length(clocks) > 1) {
@@ -59,13 +61,14 @@ add.state <- function(A) {
     }
   }
 
-  substs <- get.substs() 
+  siteMs <- get.siteMs() 
   add.comment("The substitution models")
   add.comment("HKY kappas and uniform frequencies")
   # TODO this just does HKY
-  for (g in 1:length(substs)) {
-    add.node("parameter", attrs=c(id=kappaID(g), name="stateNode"), .children="2.0")
-    attrs <- c(id=frequenciesID(g), name="stateNode", dimension="4", lower="0.0", upper="1.0")
+  for (u in 1:length(siteMs)) {
+    # TODO what does u index? site models? OK?
+    add.node("parameter", attrs=c(id=kappaID.u(u), name="stateNode"), .children="2.0")
+    attrs <- c(id=frequenciesID.u(u), name="stateNode", dimension="4", lower="0.0", upper="1.0")
     add.node("parameter", attrs=attrs, .children="0.25")
   }
   

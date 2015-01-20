@@ -38,7 +38,8 @@ xmlTree.from.analysis.structure <- function(A)
                  "beast.evolution.substitutionmodel",
                  "beast.evolution.likelihood")
   attrs <- c(version="2.0", namespace=packages, beautistatus="", beautitemplate="")
-  TheSTACEYxmlTree <<- xmlTree(tag="beast", attrs = attrs, doc = newXMLDoc(NULL, NULL))
+  TheSTACEYxmlTree <<- suppressWarnings(xmlTree(tag="beast", attrs = attrs))
+  # TODO keep getting 'empty XML document' warning
   add.data(A)
   add.node("map", attrs=c(name="Beta"),  .children=c("beast.math.distributions.Beta"))
   add.node("map", attrs=c(name="Exponential"),  .children=c("beast.math.distributions.Exponential"))

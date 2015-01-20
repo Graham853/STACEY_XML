@@ -38,7 +38,9 @@ add.hugecomment <- function(txt) {
   partline <- paste0(rep("~", 23 - as.integer(round(nchar(txt)/2))), collapse="")
   TheSTACEYxmlTree$addComment(xline)
   TheSTACEYxmlTree$addComment(emptyline)
+  TheSTACEYxmlTree$addComment(emptyline)
   TheSTACEYxmlTree$addComment(paste0(partline, " ", txt, " ", partline))
+  TheSTACEYxmlTree$addComment(emptyline)
   TheSTACEYxmlTree$addComment(emptyline)
   TheSTACEYxmlTree$addComment(xline)
 }

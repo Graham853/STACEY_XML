@@ -1,7 +1,7 @@
 
 add.operators <- function(A) {
   nofmcs <- length(get.minclusters())
-  add.comment("Operators for both smcTree and gene trees.")
+  add.comment("Operators for both smcTree and locus trees.")
   add.smctree.gtree.op(18, nodeReheightID(),            "NodeReheight")
   if (nofmcs > 2)
   { add.smctree.gtree.op(6,  nodesNudgeID(),              "stacey.NodesNudge") }
@@ -25,23 +25,24 @@ add.operators <- function(A) {
   if (!get.smct.popsf.fixed()) 
    { add.general.scaleOperator(popSFScalerID(), popSFID(), 0.75, 1) }
   add.general.scaleOperator(bdcOriginHtScalerID(), bdcOriginHtID(), 0.75, 1)
-
+  
   pergtreewt <- 60 / nof.alignments()
-  add.bigcomment("Operators for the gene trees")
-  for (g in 1:nof.alignments()) {
+  add.bigcomment("Operators for the trees for each locus")
+  gtrees <- get.gtrees()
+  for (g in 1:length(gtrees)) {
     if (nofmcs > 2) { 
       #TODO should be nof sequences for gene
-      add.comment(paste0("topology-changing ops for gene tree ", g)) 
+      add.comment(paste0("topology-changing ops for tree for locus ", g)) 
       add.subtreeSlide(g, gtreewweight(15)) 
       add.narrowExchange(g, gtreewweight(15)) 
       add.wideExchange(g, gtreewweight(4)) 
       add.wilsonBalding(g, gtreewweight(4)) 
     }
-    add.comment(paste0("height-only-changing ops for gene tree ", g))
+    add.comment(paste0("height-only-changing ops for tree for locus ", g))
     add.uniformOperator.internalNodeHeights(g, gtreewweight(30)) 
     add.scaleOperator.allHeights(g, gtreewweight(4)) 
     add.scaleOperator.rootHeight(g, gtreewweight(4)) 
-    add.comment(paste0("op for heights and relative clock rate for gene tree ", g))
+    add.comment(paste0("op for heights and relative clock rate for for tree for locus ", g))
     add.upRate.downHeights(g, gtreewweight(30))
   }
   
@@ -49,23 +50,19 @@ add.operators <- function(A) {
   clocks <- get.clocks()
   if (length(clocks) > 1) {
     for (c in 2:length(clocks)) {
-      add.comment(paste0("op for relative clock rate for gene tree ", c)) 
-      add.general.scaleOperator(clockRateScalerID(c), clockRateID(c), 0.75, gtreewweight(2))
+      add.comment(paste0("op for relative clock rate for partition ", c)) 
+      add.general.scaleOperator(clockRateScalerID(c), clockRateID.c(c), 0.75, gtreewweight(2))
     }
   }
   
-  substs <- get.substs() 
-  for (s in 1:length(substs)) {
-    add.comment(paste0("kappas and frequencies ops for subst model ", s))
+  siteMs <- get.siteMs() 
+  for (u in 1:length(siteMs)) {
+    # TODO what does u index? site models? OK?
+    add.comment(paste0("kappas and frequencies ops for subst model ", u))
     #TODO other subst models
-    add.general.scaleOperator(kappaScalerID(s), kappaID(s), 0.5, gtreewweight(2))
-    add.deltaExchange.frequencies(s, gtreewweight(2))
+    add.general.scaleOperator(kappaScalerID.u(u), kappaID.u(u), 0.5, gtreewweight(2))
+    add.deltaExchange.frequencies(u, gtreewweight(2))
   }
-  
-  
-
-
-
 }
 
 
@@ -76,8 +73,9 @@ add.operators <- function(A) {
 add.smctree.gtree.op <- function(wt, id, spec) {
   attrs <- c(id=id, spec=spec, taxonset=IDtoREF(taxonSetOfSetsID()), tree=IDtoREF(smcTreeID()), weight=wt)
   add.opennode("operator", attrs=attrs)
-  for (g in 1:nof.alignments()) {
-    add.node("tree", c(id=geneTreeID(g), name="genetree"))
+  gtrees <- get.gtrees()
+  for (g in 1:length(gtrees)) {
+    add.node("tree", c(id=geneTreeID.g(g), name="genetree"))
   }
   add.closetag()
 } 
@@ -102,6 +100,8 @@ gtreewweight <- function(perc) {
 
 
 add.upGrowthClocks.downPopsHeights <- function(wt) {
+  gtrees <- get.gtrees()
+  clocks <- get.clocks()
   bdcm <- get.bdc.model()
   attrs <- c(id=upGrowthClocks.downPopsHeightsID(), spec="UpDownOperator", weight=wt, scaleFactor="0.75")
   add.opennode("operator", attrs=attrs)
@@ -109,9 +109,9 @@ add.upGrowthClocks.downPopsHeights <- function(wt) {
   if (!get.bdcm.growthrate.fixed()) {
     add.node("parameter", attrs=c(id=bdcGrowthID(), name="up"))
   }
-  if (nof.alignments() > 1) {
-    for (g in 2:nof.alignments()) {
-      add.node("parameter", attrs=c(id=clockRateID(g), name="up"))
+  if (length(clocks) > 1) {
+    for (c in 2:length(clocks)) {
+      add.node("parameter", attrs=c(id=clockRateID.c(c), name="up"))
     }
   }
   if (!get.smct.popsf.fixed()) {
@@ -119,8 +119,8 @@ add.upGrowthClocks.downPopsHeights <- function(wt) {
   }
   add.node("tree", attrs=c(id=smcTreeID(), name="down"))
   
-  for (g in 1:nof.alignments()) {
-    add.node("tree", attrs=c(id=geneTreeID(g), name="down"))
+  for (g in 1:length(gtrees)) {
+    add.node("tree", attrs=c(id=geneTreeID.g(g), name="down"))
   }  
   add.closetag() 
 } 
@@ -130,63 +130,64 @@ add.upGrowthClocks.downPopsHeights <- function(wt) {
 
 add.subtreeSlide <- function(g, weight) {
   add.node("operator", attrs=c(id=subtreeSlideID(g), spec="SubtreeSlide", 
-                               tree=IDtoREF(geneTreeID(g)), weight=weight))
+                               tree=IDtoREF(geneTreeID.g(g)), weight=weight))
 }
 
 
 add.narrowExchange <- function(g, weight) {
   add.node("operator", attrs=c(id=narrowID(g), spec="Exchange", 
-                               tree=IDtoREF(geneTreeID(g)), weight=weight))
+                               tree=IDtoREF(geneTreeID.g(g)), weight=weight))
 }
 
 
 add.wideExchange <- function(g, weight) {
   add.node("operator", attrs=c(id=wideID(g), spec="Exchange", 
-                               tree=IDtoREF(geneTreeID(g)), isNarrow="false", weight=weight))
+                               tree=IDtoREF(geneTreeID.g(g)), isNarrow="false", weight=weight))
 }
 
 
 add.wilsonBalding <- function(g, weight) {
   add.node("operator", attrs=c(id=WilsonBaldingID(g), spec="WilsonBalding", 
-                               tree=IDtoREF(geneTreeID(g)), weight=weight))
+                               tree=IDtoREF(geneTreeID.g(g)), weight=weight))
 }
 
 
 add.uniformOperator.internalNodeHeights <- function(g, weight) {
   add.node("operator", attrs=c(id=uniformID(g), spec="Uniform",
-                               tree=IDtoREF(geneTreeID(g)), weight=weight))
+                               tree=IDtoREF(geneTreeID.g(g)), weight=weight))
 }
 
 
 add.scaleOperator.rootHeight <- function(g, weight) {
   add.node("operator", attrs=c(id=treeRootScalerID(g), spec="ScaleOperator", 
-                               tree=IDtoREF(geneTreeID(g)), scaleFactor="0.5", weight=weight))
+                               tree=IDtoREF(geneTreeID.g(g)), scaleFactor="0.5", weight=weight))
 }
 
 
 add.scaleOperator.allHeights <- function(g, weight) {
   add.node("operator", attrs=c(id=treeScalerID(g), spec="ScaleOperator",
-                               tree=IDtoREF(geneTreeID(g)), scaleFactor="0.5", weight=weight))
+                               tree=IDtoREF(geneTreeID.g(g)), scaleFactor="0.5", weight=weight))
 }
 
 
-add.upRate.downHeights <- function(g, weight) {
-  attrs <- c(id=upClock.downHeightsID(g), spec="UpDownOperator", scaleFactor="0.75", weight=weight)
+#TODO I'm confused here. which clocks, which gtrees?
+add.upRate.downHeights <- function(a, weight) {
+  attrs <- c(id=upClock.downHeightsID(a), spec="UpDownOperator", scaleFactor="0.75", weight=weight)
   add.opennode("operator", attrs=attrs)
-  if (g > 1) {
-    add.node("parameter", attrs=c(id=clockRateID(g), name="up"))
+  if (a > 1) {
+    add.node("parameter", attrs=c(id=clockRateID.a(a), name="up"))
   } 
-  add.node("tree", attrs=c(id=geneTreeID(g), name="down"))
+  add.node("tree", attrs=c(id=geneTreeID.a(a), name="down"))
   add.closetag()
 }
 
 
 
 
-add.deltaExchange.frequencies <- function(g, weight) {
-  attrs <- c(id=frequenciesExchangerID(g), spec="DeltaExchangeOperator", delta="0.01", weight=weight)
+add.deltaExchange.frequencies <- function(u, weight) {
+  attrs <- c(id=frequenciesExchangerID(u), spec="DeltaExchangeOperator", delta="0.01", weight=weight)
   add.opennode("operator", attrs=attrs)
-  add.node("parameter", attrs=c(id=frequenciesID(g)))
+  add.node("parameter", attrs=c(id=frequenciesID.u(u)))
   add.closetag() 
 }
 

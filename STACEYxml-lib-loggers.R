@@ -41,12 +41,25 @@ add.main.logger <- function(A) {
                           popPriorScale=IDtoREF(popSFID()), piomsCoalDist=IDtoREF(smcCoalescentID())))
 
   # TODO Depends on which clocks, substs, are used
-  for (g in 1:nof.alignments()) {
-    add.comment(paste0("clock and substitution parameters for gene tree ", g))
+  clocks <- get.clocks()
+  gtrees <- get.gtrees()
+  siteMs <- get.siteMs()
+  
+  add.comment("Tree likelihoods for each locus")
+  for (g in 1:length(gtrees)) {
     add.node("log", attrs=c(idref=geneTreeLhoodID(g)))
-    add.node("parameter", attrs=c(idref=clockRateID(g), name="log"))
-    add.node("parameter", attrs=c(idref=kappaID(g), name="log"))
-    add.node("parameter", attrs=c(idref=frequenciesID(g), name="log"))
+  }
+
+  add.comment("clock rates (relative rates)")
+  for (c in 1:length(clocks)) {
+    add.node("parameter", attrs=c(idref=clockRateID.c(c), name="log"))
+  }
+  
+  add.comment("Substitution model parameters")
+  for (u in 1:length(siteMs)) {
+    # TODO what does u index? site models? OK?
+    add.node("parameter", attrs=c(idref=kappaID.u(u), name="log"))
+    add.node("parameter", attrs=c(idref=frequenciesID.u(u), name="log"))
     }
   add.closetag()
 }

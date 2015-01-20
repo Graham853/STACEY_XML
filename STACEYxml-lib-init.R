@@ -13,11 +13,12 @@ add.init <- function(A) {
   sp.attrs <- c(id="randomPopSize.smc", name="popSize")
   add.node("parameter", attrs=sp.attrs, .children="0.05")
   add.closetag()
-  add.comment("Next make initial gene trees with random topologies and nodes deeper than smcTree root.")
+  add.comment("Next make initial locus trees with random topologies and nodes deeper than smcTree root.")
 
-  for (g in 1:nof.alignments()) {
+  gtrees <- get.gtrees()
+  for (g in 1:length(gtrees)) {
     gt.attrs <- c(id=paste0("randomGeneTree.", g), spec="RandomGeneTree", estimate="false", 
-               taxonset=IDtoREF(geneTaxonSetID(g)), initial=IDtoREF(geneTreeID(g)),
+               taxonset=IDtoREF(geneTaxonSetID.g(g)), initial=IDtoREF(geneTreeID.g(g)),
                speciesTree=IDtoREF(smcTreeID()))
     add.opennode("init", attrs=gt.attrs)
     gm.attrs <- c(id=paste0("RGTPopulationModel.", g), spec="ConstantPopulation")
