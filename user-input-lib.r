@@ -29,7 +29,7 @@ TheAnalysis <- function(id, data.dpath, alignment.table, taxa.table, run.options
                                 data.dpath=data.dpath,
                                 alignment.table=list(kind="AlignmentTable", id="alignment.table", alignments=aug.alignments),
                                 taxa.table=list(kind="TaxaTable", id="taxa.table", taxa.table=taxa.table),
-                                run.options=list(kind="RunOptions", id="run.options", run.options=run.options)
+                                run.options=list(kind="RunOptions", id="run.options", opts=run.options)
                                 )
 }
 
@@ -378,6 +378,16 @@ LogNorm <- function(id, meanlog=NULL, sdlog=NULL) {
   }
   invisible(x)
 }
+
+
+Beta <- function(id, alpha=NULL, beta=NULL) {
+  x <- list(kind="Beta", id=id, alpha=alpha, beta=beta)
+  if (real.kids(x)) {
+    insert(x)  
+  }
+  invisible(x)
+}
+
 
 Uniform <- function(id, lower=NULL, upper=NULL) {
   x <- list(kind="Uniform", id=id, lower=lower, upper=upper)

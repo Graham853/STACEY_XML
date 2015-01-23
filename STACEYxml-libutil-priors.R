@@ -39,7 +39,7 @@ add.lnorm.prior <- function(prior) {
 add.beta.prior <- function(prior) {
   add.opennode("Beta", attrs=c(id=paste0("Beta.", prior$id), name="distr"))
   attrs <- c(id=paste0("alpha.", prior$id), name="alpha", estimate="false")
-  add.nodee("parameter", attrs=attrs, .children=prior$alpha)
+  add.node("parameter", attrs=attrs, .children=prior$alpha)
   attrs <- c(id=paste0("beta.", prior$id), name="beta", estimate="false")
   add.node("parameter", attrs=attrs, .children=prior$beta)
   add.closetag()

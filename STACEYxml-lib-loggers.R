@@ -7,15 +7,15 @@ add.loggers <- function(A) {
 #   for (g in 1:A$nloci) {
 #     add.gtree.logger(A, g)
 #   }
-#   add.screen.logger(A)
+  add.screen.logger(A)
 }
 
  
 
 
 add.main.logger <- function(A) {
-  add.opennode("logger", attrs=c(id=mainloggerID(), fileName=A$run.options$sampledparams.fpath, 
-                             logEvery=A$run.options$params.logevery, model="@posterior", sort="smart"))
+  add.opennode("logger", attrs=c(id=mainloggerID(), fileName=A$run.options$opts$sampledparams.fpath, 
+                             logEvery=A$run.options$opts$params.logevery, model="@posterior", sort="smart"))
 
   add.node("log", attrs=c(idref=posteriorID()))
   add.node("log", attrs=c(idref=likelihoodID()))
@@ -25,7 +25,7 @@ add.main.logger <- function(A) {
   
   add.comment("birth-death-collapse model and its parameters")
   add.node("log", attrs=c(idref=bdcModelID()))
-  add.node("parameter", attrs=c(idref=bdcModelID(), name="log"))
+  add.node("parameter", attrs=c(idref=bdcGrowthID(), name="log"))
   add.node("parameter", attrs=c(idref=bdcRelDeathID(), name="log"))
   add.node("parameter", attrs=c(idref=bdcCollapseWtID(), name="log"))
   
@@ -33,11 +33,11 @@ add.main.logger <- function(A) {
   add.node("parameter", attrs=c(idref=bdcOriginHtID(), name="log"))
 
   add.comment("Statistic for number of clusters")
-  add.node("log", atrrs=c(spec="stacey.BirthDeathCollapseNClustersStatistic", 
+  add.node("log", attrs=c(spec="stacey.BirthDeathCollapseNClustersStatistic", 
                        bdcm=IDtoREF(bdcModelID()), smcTree=IDtoREF(smcTreeID())))
   
   add.comment("Statistic for population size")
-  add.node("log", atrrs=c(spec="stacey.PopSampleStatistic", 
+  add.node("log", attrs=c(spec="stacey.PopSampleStatistic", 
                           popPriorScale=IDtoREF(popSFID()), piomsCoalDist=IDtoREF(smcCoalescentID())))
 
   # TODO Depends on which clocks, substs, are used
@@ -66,9 +66,24 @@ add.main.logger <- function(A) {
 
 
 
+add.screen.logger <- function(A) {
+  attrs = c(id=screenloggerID(), logEvery="1000", model=IDtoREF(posteriorID()))
+  add.opennode("logger", attrs=attrs)
+  add.node("log", attrs=c(idref=posteriorID()))
+  add.node("log", attrs=c(id="ESS.posterior", spec="util.ESS", arg=IDtoREF(posteriorID())))
+  add.node("log", attrs=c(idref=likelihoodID()))
+  add.node("log", attrs=c(idref=priorID()))
+  add.node("log", attrs=c(idref=smcCoalescentID()))
+  add.node("log", attrs=c(spec="stacey.BirthDeathCollapseNClustersStatistic",
+                         bdcm=IDtoREF(bdcModelID()), smcTree=IDtoREF(smcTreeID())))
+  add.closetag()
+}
+
+
+
 # smctreeloggerID() 
 # gtreeloggerID(g)
-# screenloggerID()
+# 
 
  
  # smctree.logevery=1000,
@@ -118,31 +133,6 @@ add.main.logger <- function(A) {
 # }
 # 
 # 
-#  screen.logevery=10000
-# add.screen.logger <- function(A) {
-#   catln(1, "<logger",
-#         id("screenlog"),
-#         namevalue("logEvery", sim.options$beastscreen.logevery),
-#         namevalue("model", "@posterior"), ">")
-#   catln(2, idref("log", "posterior", NULL))
-#   catln(2, "<log",
-#         id("ESS.posterior"),
-#         spec("util.ESS"),
-#         namevalue("arg", "@posterior"), "/>")
-#   catln(2, idref("log", "likelihood", NULL))
-#   catln(2, idref("log", "prior", NULL))
-#   catln(2, idref("log", smcCoalescentID(), NULL))
-#   
-#   catln(2, "<log",
-#         spec("stacey.BirthDeathCollapseNClustersStatistic"),
-#         namevalue("bdcm", IDtoREF(bdcModelID())),
-#         namevalue("smcTree", IDtoREF(smcTreeID())), "/>")
-#   
-#   catln(1, "</logger>")
-#   
-# }
-# 
-
 
 
 

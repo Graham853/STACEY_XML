@@ -302,7 +302,7 @@ kappaID.u <- function(u) {
 
 frequenciesModelID.a <- function(a) {
   model <- TheAnalysisStructure$alignment.table$alignments[[a]]$siteM$subst$model
-  xmlIDFromElement(model)
+  paste0("FrequenciesModel:", model$freqs$id)
 }
 
 
@@ -391,7 +391,7 @@ gtreeloggerID <- function(g) {
 
 
 screenloggerID <- function() {
-  "Logger:trace"
+  "Logger:screen"
 }
 
 

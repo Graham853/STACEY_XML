@@ -50,11 +50,9 @@ add.likelihood.distribution <- function(A) {
 
 
 add.partition.lhood <- function(A, a) {
-
-  
   add.comment(paste0("tree likelihood for partition ", a))
-  attrs <- c(id=geneTreeLhoodID(a), data=IDtoREF(geneTreeID.a(a)), 
-             spec="TreeLikelihood", tree="TreeLikelihood")
+  attrs <- c(id=geneTreeLhoodID(a), data=IDtoREF(partitiondataID.a(a)), 
+             spec="TreeLikelihood", tree=IDtoREF(geneTreeID.a(a)))
   add.opennode("distribution", attrs=attrs)
   add.comment(paste0("site model for partition ", a))
   add.sitemodel(A, a)
@@ -176,11 +174,11 @@ add.prior.distribution <- function(A) {
   attrs <- c(id=bdcModelID(), spec="stacey.BirthDeathCollapseModel",
              collapseHeight=get.bdc.model()$eps)
   add.opennode("distribution", attrs=attrs)
-  add.node("tree", attrs=c(id=smcTreeID()))
-  add.node("parameter", attrs=c(id=bdcGrowthID(), name="birthDiffRate"))
-  add.node("parameter", attrs=c(id=bdcRelDeathID(), name="relativeDeathRate"))
-  add.node("parameter", attrs=c(id=bdcCollapseWtID(), name="collapseWeight"))
-  add.node("parameter", attrs=c(id=bdcOriginHtID(), name="collapseWeight"))    
+  add.node("tree", attrs=c(idref=smcTreeID()))
+  add.node("parameter", attrs=c(idref=bdcGrowthID(), name="birthDiffRate"))
+  add.node("parameter", attrs=c(idref=bdcRelDeathID(), name="relativeDeathRate"))
+  add.node("parameter", attrs=c(idref=bdcCollapseWtID(), name="collapseWeight"))
+  add.node("parameter", attrs=c(idref=bdcOriginHtID(), name="originHeight"))    
   add.closetag()
   
   

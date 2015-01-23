@@ -2,6 +2,8 @@ setwd("C:/Users/Work/AAA/Programming/biology/STACEY_XML")
 source("user-input-lib.r")
 source("STACEYxml-lib.r")
 
+Rprof()
+
 alignment.table <- list(
   partition1=list(file="U1.nex", gtree=Gtree("1"), clock=Clock("1"), siteM=SiteModel("1")),
   partition2=list(file="U2.nex", gtree=Gtree("2"), clock=Clock("2"), siteM=SiteModel("2")),
@@ -56,16 +58,17 @@ for (i in 1:length(gtrees)) {
 
 SMCtree("smctree", BDCPrior("smctree"), SMCCoalescent("staceycoal"))
 BDCPrior("smctree", growthrate=LogNorm("smctree.g"), 
-         reldeath=Uniform("smctree.rd"), 
-         w=Uniform("smctree.w"), 
+         reldeath=Beta("smctree.rd"), 
+         w=Beta("smctree.w"), 
          ohID="origin.height",
          eps=0.00003)
 LogNorm("smctree.g", 4.6, 2)
-Uniform("smctree.rd", 0, 1)
-Uniform("smctree.w", 0, 1) 
+Beta("smctree.rd", 1, 1)
+Beta("smctree.w", 1, 1) 
 SMCCoalescent("staceycoal", invgammamix=InvGammaMix("popBV"), popSF=LogNorm("popSF"))
 LogNorm("popSF", -7, 2)
 InvGammaMix("popBV", weights=c(0.5,0.5), alphas=c(3,3), betas=c(1.5,2.5))
+
 
 clocks <- get.clocks()
 for (i in 1:length(clocks)) {
@@ -98,6 +101,7 @@ for (i in 1:length(siteMs)) {
 xmlTree.from.analysis.structure(TheAnalysisStructure)
 saveXML(TheSTACEYxmlTree$value(), file="test.xml")
 
+Rprof(NULL)
 
 sink(file="test.txt")
 str(TheAnalysisStructure)

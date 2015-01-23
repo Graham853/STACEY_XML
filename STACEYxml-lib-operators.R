@@ -2,13 +2,14 @@
 add.operators <- function(A) {
   nofmcs <- length(get.minclusters())
   add.comment("Operators for both smcTree and locus trees.")
-  add.smctree.gtree.op(18, nodeReheightID(),            "NodeReheight")
-  if (nofmcs > 2)
-  { add.smctree.gtree.op(6,  nodesNudgeID(),              "stacey.NodesNudge") }
-  if (nofmcs > 2)
-  { add.smctree.gtree.op(6,  coordinatedPruneRegraftID(), "stacey.CoordinatedPruneRegraft") }
-  if (nofmcs > 3)
-  { add.smctree.gtree.op(6,  focusedScalerID(),           "stacey.FocusedNodeHeightScaler") }
+  add.nodeReheight(18)
+  if (nofmcs > 2) {
+    add.nodesNudge(6)
+    add.coordinatedPruneRegraft(6)
+  }
+  if (nofmcs > 3) {
+    add.focusedScaler(6)
+  }
   
   add.comment("stretch and squeeze everything") 
   add.upGrowthClocks.downPopsHeights(2) 
@@ -70,16 +71,53 @@ add.operators <- function(A) {
 #################################################################################
 # low level, more general functions
 
-add.smctree.gtree.op <- function(wt, id, spec) {
-  attrs <- c(id=id, spec=spec, taxonset=IDtoREF(taxonSetOfSetsID()), tree=IDtoREF(smcTreeID()), weight=wt)
+add.nodeReheight <- function(wt) {
+  attrs <- c(id=nodeReheightID(), spec="NodeReheight", 
+             taxonset=IDtoREF(taxonSetOfSetsID()), tree=IDtoREF(smcTreeID()), weight=wt)
   add.opennode("operator", attrs=attrs)
   gtrees <- get.gtrees()
   for (g in 1:length(gtrees)) {
-    add.node("tree", c(idref=geneTreeID.g(g), name="genetree"))
+    add.node("tree", attrs=c(idref=geneTreeID.g(g), name="genetree"))
   }
   add.closetag()
 } 
 
+
+add.nodesNudge <- function(wt) {
+  attrs <- c(id=nodesNudgeID(), spec="stacey.NodesNudge", weight=wt)
+  add.opennode("operator", attrs=attrs)
+  add.node("smcTree", attrs=c(idref=smcTreeID()))
+  gtrees <- get.gtrees()
+  for (g in 1:length(gtrees)) {
+    add.node("tree", attrs=c(idref=geneTreeID.g(g), name="geneTree"))
+  }
+  add.closetag()
+}
+
+
+add.coordinatedPruneRegraft <- function(wt) {
+  attrs <- c(id=coordinatedPruneRegraftID(), spec="stacey.CoordinatedPruneRegraft", weight=wt)
+  add.opennode("operator", attrs=attrs)
+  add.node("smcTree", attrs=c(idref=smcTreeID()))
+  gtrees <- get.gtrees()
+  for (g in 1:length(gtrees)) {
+    add.node("tree", attrs=c(idref=geneTreeID.g(g), name="geneTree"))
+  }
+  add.closetag()
+  
+}
+
+
+add.focusedScaler <- function(wt) {
+  attrs <- c(id=focusedScalerID(), spec="stacey.FocusedNodeHeightScaler", weight=wt)
+  add.opennode("operator", attrs=attrs)
+  add.node("smcTree", attrs=c(idref=smcTreeID()))
+  gtrees <- get.gtrees()
+  for (g in 1:length(gtrees)) {
+    add.node("tree", attrs=c(idref=geneTreeID.g(g), name="geneTree"))
+  }
+  add.closetag()
+}
 
 
 add.general.scaleOperator <- function(ID, paramID, sfactor, weight) {
@@ -185,7 +223,7 @@ add.upRate.downHeights <- function(a, weight) {
 add.deltaExchange.frequencies <- function(u, weight) {
   attrs <- c(id=frequenciesExchangerID(u), spec="DeltaExchangeOperator", delta="0.01", weight=weight)
   add.opennode("operator", attrs=attrs)
-  add.node("parameter", attrs=c(id=frequenciesParamID.u(u)))
+  add.node("parameter", attrs=c(idref=frequenciesParamID.u(u)))
   add.closetag() 
 }
 

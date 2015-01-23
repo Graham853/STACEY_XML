@@ -11,7 +11,7 @@ add.state <- function(A) {
   tx <- tt[,1] 
   add.opennode("taxonset", attrs=c(id=taxonSetOfSetsID(), spec="TaxonSet"))
   for (mc in 1:length(umcs)) {
-    add.opennode("taxon", attrs=c(id=umcs[mc], spec="Taxon"))
+    add.opennode("taxon", attrs=c(id=umcs[mc], spec="TaxonSet"))
     for (i in 1:nrow(tt)) {
       if (umcs[mc] == mcs[i]) {
         add.node("taxon", attrs=c(id=tx[i], spec="Taxon"))
@@ -44,7 +44,7 @@ add.state <- function(A) {
   for (g in 1:length(gtrees)) {
     add.comment(paste0("Gene tree ", g))
     add.opennode("tree", attrs=c(id=geneTreeID.g(g), name="stateNode"))
-    add.opennode("tree", attrs=c(id=geneTaxonSetID.g(g), spec="TaxonSet"))
+    add.opennode("taxonset", attrs=c(id=geneTaxonSetID.g(g), spec="TaxonSet"))
     add.node("data", attrs=c(idref=partitiondataID.g(g), name="alignment"))
     #TODO don't understand the data refereence when trees are linked.
     add.closetag()
@@ -55,7 +55,7 @@ add.state <- function(A) {
   clocks <- get.clocks()
   if (length(clocks) > 1) {
     for (c in 2:length(clocks)) {
-      add.node("parameter", attrs=c(id=clocks[[c]]$id, name="stateNode"), .children="1.0")
+      add.node("parameter", attrs=c(id=clockRateID.c(c), name="stateNode"), .children="1.0")
     }
   }
 

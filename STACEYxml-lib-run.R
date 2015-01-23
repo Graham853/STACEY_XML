@@ -1,7 +1,7 @@
 
 
 add.run <- function(A) {
-  add.opennode("run", attrs=c(id="mcmc", spec="MCMC", chainlength="1000000", storeEvery="500000"))
+  add.opennode("run", attrs=c(id="mcmc", spec="MCMC", chainLength="1000000", storeEvery="500000"))
   add.hugecomment("state")
   add.state(A)
   add.hugecomment("init")
