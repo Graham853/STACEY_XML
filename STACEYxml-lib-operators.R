@@ -75,18 +75,16 @@ add.smctree.gtree.op <- function(wt, id, spec) {
   add.opennode("operator", attrs=attrs)
   gtrees <- get.gtrees()
   for (g in 1:length(gtrees)) {
-    add.node("tree", c(id=geneTreeID.g(g), name="genetree"))
+    add.node("tree", c(idref=geneTreeID.g(g), name="genetree"))
   }
   add.closetag()
 } 
 
 
 
-add.general.scaleOperator <- function(ID, param, sfactor, weight) {
-  attrs <- c(id=ID, spec="ScaleOperator", scaleFactor=sfactor, weight=weight)
-  add.opennode("operator", attrs=attrs)
-  add.node("parameter", id=param)
-  add.closetag()
+add.general.scaleOperator <- function(ID, paramID, sfactor, weight) {
+  attrs <- c(id=ID, spec="ScaleOperator", parameter=IDtoREF(paramID), scaleFactor=sfactor, weight=weight)
+  add.node("operator", attrs=attrs)
 }  
 
 
@@ -107,20 +105,20 @@ add.upGrowthClocks.downPopsHeights <- function(wt) {
   add.opennode("operator", attrs=attrs)
   
   if (!get.bdcm.growthrate.fixed()) {
-    add.node("parameter", attrs=c(id=bdcGrowthID(), name="up"))
+    add.node("parameter", attrs=c(idref=bdcGrowthID(), name="up"))
   }
   if (length(clocks) > 1) {
     for (c in 2:length(clocks)) {
-      add.node("parameter", attrs=c(id=clockRateID.c(c), name="up"))
+      add.node("parameter", attrs=c(idref=clockRateID.c(c), name="up"))
     }
   }
   if (!get.smct.popsf.fixed()) {
-    add.node("parameter", attrs=c(id=popSFID(), name="down"))
+    add.node("parameter", attrs=c(idref=popSFID(), name="down"))
   }
-  add.node("tree", attrs=c(id=smcTreeID(), name="down"))
+  add.node("tree", attrs=c(idref=smcTreeID(), name="down"))
   
   for (g in 1:length(gtrees)) {
-    add.node("tree", attrs=c(id=geneTreeID.g(g), name="down"))
+    add.node("tree", attrs=c(idref=geneTreeID.g(g), name="down"))
   }  
   add.closetag() 
 } 
@@ -175,9 +173,9 @@ add.upRate.downHeights <- function(a, weight) {
   attrs <- c(id=upClock.downHeightsID(a), spec="UpDownOperator", scaleFactor="0.75", weight=weight)
   add.opennode("operator", attrs=attrs)
   if (a > 1) {
-    add.node("parameter", attrs=c(id=clockRateID.a(a), name="up"))
+    add.node("parameter", attrs=c(idref=clockRateID.a(a), name="up"))
   } 
-  add.node("tree", attrs=c(id=geneTreeID.a(a), name="down"))
+  add.node("tree", attrs=c(idref=geneTreeID.a(a), name="down"))
   add.closetag()
 }
 
@@ -187,7 +185,7 @@ add.upRate.downHeights <- function(a, weight) {
 add.deltaExchange.frequencies <- function(u, weight) {
   attrs <- c(id=frequenciesExchangerID(u), spec="DeltaExchangeOperator", delta="0.01", weight=weight)
   add.opennode("operator", attrs=attrs)
-  add.node("parameter", attrs=c(id=frequenciesID.u(u)))
+  add.node("parameter", attrs=c(id=frequenciesParamID.u(u)))
   add.closetag() 
 }
 

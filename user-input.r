@@ -3,19 +3,32 @@ source("user-input-lib.r")
 source("STACEYxml-lib.r")
 
 alignment.table <- list(
-  partition1=list(file="xxx.nex", gtree=Gtree("1"), clock=Clock("1"),     siteM=SiteModel("1")),
-  partition2=list(file="yyy.nex", gtree=Gtree("2"), clock=Clock("2and3"), siteM=SiteModel("2and3")),
-  partition3=list(file="zzz.nex", gtree=Gtree("3"), clock=Clock("2and3"), siteM=SiteModel("2and3"))
+  partition1=list(file="U1.nex", gtree=Gtree("1"), clock=Clock("1"), siteM=SiteModel("1")),
+  partition2=list(file="U2.nex", gtree=Gtree("2"), clock=Clock("2"), siteM=SiteModel("2")),
+  partition3=list(file="U3.nex", gtree=Gtree("3"), clock=Clock("3"), siteM=SiteModel("3")),
+  partition4=list(file="U4.nex", gtree=Gtree("4"), clock=Clock("4"), siteM=SiteModel("4")),
+  partition5=list(file="U5.nex", gtree=Gtree("5"), clock=Clock("5"), siteM=SiteModel("5"))
 )
 
 taxa.table <- rbind(
-c("a1", "a"),
-c("a2", "a"),
-c("a3", "a"),
-c("b1", "b"),
-c("b2", "b")
+  c("a01_A", "a"),
+  c("a02_A", "a"),
+  c("a03_A", "a"),
+  c("a04_A", "a"),
+  c("a05_A", "a"),
+  c("b01_A", "b"),
+  c("b02_A", "b"),
+  c("b03_A", "b"),
+  c("b04_A", "b"),
+  c("b05_A", "b"),
+  c("c01_A", "c"),
+  c("c02_A", "c"),
+  c("c03_A", "c"),
+  c("c04_A", "c"),
+  c("c05_A", "c")
 )
 colnames(taxa.table) <- c("taxon", "mincluster")
+
 
 run.options <- list(
   sampledgtrees.fpathbase="gtrees",
@@ -54,25 +67,32 @@ SMCCoalescent("staceycoal", invgammamix=InvGammaMix("popBV"), popSF=LogNorm("pop
 LogNorm("popSF", -7, 2)
 InvGammaMix("popBV", weights=c(0.5,0.5), alphas=c(3,3), betas=c(1.5,2.5))
 
+clocks <- get.clocks()
+for (i in 1:length(clocks)) {
+  id <- clocks[[i]]$id
+  Clock(id, PartitionRate(id))
+  if (i==1) {
+    PartitionRate(id, 1.0)
+  } else {
+    clockID <- paste0("clockrate.", id)
+    PartitionRate(id, LogNorm(clockID))
+    LogNorm(clockID, 0.0, 1.0) 
+  }
+}
 
-Clock("1", PartitionRate("1"))
-PartitionRate("1", 1.0)
-Clock("2and3", PartitionRate("2and3"))
-PartitionRate("2and3", LogNorm("clock.2and3"))
-LogNorm("clock.2and3",0,1)
 
-SiteModel("1", Subst("1"), SiteHet("1"))
-SiteModel("2and3", Subst("2and3"), SiteHet("2and3"))
-SiteHet("1", "None")
-SiteHet("2and3")
-SiteHet("2and3", "None")
-Subst("1", HKY("1"))
-HKY("1", UniformUnitSimplex("hky.1.freqs"), LogNorm("hky.kappa"))
-UniformUnitSimplex("hky.1.freqs", 3)
-Subst("2and3", HKY("2and3"))
-HKY("2and3", UniformUnitSimplex("hky.2and3.freqs"), LogNorm("hky.kappa"))
-UniformUnitSimplex("hky.2and3.freqs", 3)
-LogNorm("hky.kappa",1,1.25)
+siteMs <- get.siteMs()
+for (i in 1:length(siteMs)) {
+  id <- siteMs[[i]]$id
+  SiteModel(id, Subst(id), SiteHet(id))
+  SiteHet(id, "None")
+  Subst(id, HKY(id))
+  freqsID <- paste0("HKYfreqs.", id)
+  kappaID <- paste0("HKYkappa.", id)
+  HKY(id, UniformUnitSimplex(freqsID), LogNorm(kappaID))
+  UniformUnitSimplex(freqsID, 3)
+  LogNorm(kappaID, 1.0, 1.25)
+}
 
 
 xmlTree.from.analysis.structure(TheAnalysisStructure)
@@ -83,6 +103,6 @@ sink(file="test.txt")
 str(TheAnalysisStructure)
 sink(NULL)
 
-str(TheAnalysisStructure$alignment.table$alignments[[1]]$gtree$prior)
+#str(TheAnalysisStructure$alignment.table$alignments[[1]]$gtree$prior)
 
 

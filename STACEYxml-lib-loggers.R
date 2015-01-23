@@ -14,12 +14,12 @@ add.loggers <- function(A) {
 
 
 add.main.logger <- function(A) {
-  add.opennode("logger", attrs=c(id="tracelog", fileName=A$run.options$sampledparams.fpath, 
+  add.opennode("logger", attrs=c(id=mainloggerID(), fileName=A$run.options$sampledparams.fpath, 
                              logEvery=A$run.options$params.logevery, model="@posterior", sort="smart"))
 
-  add.node("log", attrs=c(idref="posterior"))
-  add.node("log", attrs=c(idref="likelihood"))
-  add.node("log", attrs=c(idref="prior"))
+  add.node("log", attrs=c(idref=posteriorID()))
+  add.node("log", attrs=c(idref=likelihoodID()))
+  add.node("log", attrs=c(idref=priorID()))
   add.node("log", attrs=c(idref=smcCoalescentID()))
   add.node("log", attrs=c(idref=popSFID()))
   
@@ -59,11 +59,16 @@ add.main.logger <- function(A) {
   for (u in 1:length(siteMs)) {
     # TODO what does u index? site models? OK?
     add.node("parameter", attrs=c(idref=kappaID.u(u), name="log"))
-    add.node("parameter", attrs=c(idref=frequenciesID.u(u), name="log"))
+    add.node("parameter", attrs=c(idref=frequenciesParamID.u(u), name="log"))
     }
   add.closetag()
 }
 
+
+
+# smctreeloggerID() 
+# gtreeloggerID(g)
+# screenloggerID()
 
  
  # smctree.logevery=1000,

@@ -1,17 +1,123 @@
-#  TODO change a lot to use user-sipplied IDs
 
-##################################################
-# PARAMETERS
-# STACEY 
+######## HELPER FUNCTIONS
+
+
+IDtoREF <- function(ID) {
+  paste0("@", ID)
+}
+
 
 prior.of.first.gtree <- function() {
   TheAnalysisStructure$alignment.table$alignments[[1]]$gtree$prior
 }
 
 
+xmlIDFromElement  <- function(x) {
+  stopifnot(is.character(x$kind))
+  stopifnot(is.character(x$id))
+  paste0(x$kind, ".", x$id)
+}
+
+
+xmlIDfromKindID  <- function(kind, id) {
+  if (!is.character(kind)) {
+    browser()
+  }
+  
+  stopifnot(is.character(kind))
+  stopifnot(is.character(id))
+  paste0(kind, ".", id)
+}
+
+
+dataID.a <- function(a) {
+  fname <- TheAnalysisStructure$alignment.table$alignments[[a]]$file
+  parts <- str_split(fname, fixed("."))[[1]]
+  nparts <- length(parts)
+  if (nparts == 1) {
+    id <- parts[1]
+  } else {
+    id <- paste(parts[1:(nparts-1)], collapse=".")
+  }
+  id
+}
+
+############ ID FUNCTIONS
+
+partitionID.a <- function(a) {
+  paste0("Partition:", id)
+}
+
+# data for partition a
+partitiondataID.a <- function(a) {
+  paste0("Data:", dataID.a(a))
+}
+
+# data for first partition belonging gene tree g
+partitiondataID.g <- function(g) {
+  a <- get.gtrees()[[g]]$first.partition
+  paste0("Data:", dataID.a(a))
+}
+
+
+
+sequenceID.a <- function(a, taxonname) {
+  paste0("Seq:", dataID.a(a), ".", taxonname)
+}
+
+
+
+
+
+initialsmctreeID <- function() {
+  "init:smcTree"
+}
+
+
+initialsmctreepopmodelID <- function() {
+  "init:smcTree.popmodel"
+}
+
+
+initialsmctreepopsizeID <- function() {
+  "init:smcTree:popsize"
+}
+
+
+initialgtreeID <- function(g) {
+  paste0("init:gTree", g)
+}
+
+
+initialgtreepopmodelID <- function(g) {
+  paste0("init:gTree.popmodel", g)
+}
+
+
+initialgtreepopsizeID <- function(g) {
+  paste0("init:gTree.popsize", g)
+}
+
+
+posteriorID <- function() { 
+"posterior"
+}
+
+likelihoodID <- function() { 
+  "likelihood"
+}
+
+priorID <- function() { 
+  "prior"
+}
+
+
+##########
+
+
 smcTreeID <- function() {
   smct <- prior.of.first.gtree()
-  paste0(smct$kind, ".", smct$id)
+  xmlIDFromElement(smct)
 }
 
 taxonSetOfSetsID <- function() { "taxonSetOfSets" }
@@ -19,38 +125,38 @@ taxonSetOfSetsID <- function() { "taxonSetOfSets" }
 
 bdcModelID <- function() {
   smct <- prior.of.first.gtree()
-  paste0(smct$branching$kind, ".", smct$branching$id)
+  xmlIDFromElement(smct$branching)
 }
 
 
 bdcGrowthID <- function() { 
   smct <- prior.of.first.gtree()
-  paste0(smct$branching$kind, ".", smct$branching$growthrate$id)
+  xmlIDfromKindID(smct$branching$kind, smct$branching$growthrate$id)
 }
 
 
 bdcRelDeathID <- function() {
   smct <- prior.of.first.gtree()
-  paste0(smct$branching$kind, ".", smct$branching$reldeath$id)
+  xmlIDfromKindID(smct$branching$kind, smct$branching$reldeath$id)
 }
 
 
 bdcCollapseWtID <- function() { 
   smct <- prior.of.first.gtree()
-  paste0(smct$branching$kind, ".", smct$branching$w$id)
+  xmlIDfromKindID(smct$branching$kind, smct$branching$w$id)
 }
 
 
 bdcOriginHtID <- function() {
   smct <- prior.of.first.gtree()
-  paste0(smct$branching$kind, ".", smct$branching$ohID)
+  xmlIDfromKindID(smct$branching$kind, smct$branching$ohID)
 }
 
 
 
 smcCoalescentID <- function() {
   smct <- prior.of.first.gtree()
-  paste0(smct$smccoal$kind, ".", smct$smccoal$id) 
+  xmlIDFromElement(smct$smccoal) 
 }
 
 
@@ -62,7 +168,7 @@ InvGammaComponentID <- function(c) {
 
 popSFID <- function() {
   smct <- prior.of.first.gtree()
-  paste0(smct$smccoal$kind, ".", smct$smccoal$popSF$id) 
+  xmlIDfromKindID(smct$smccoal$kind, smct$smccoal$popSF$id) 
 }
 
 
@@ -74,109 +180,154 @@ popSFID <- function() {
 
 # GENE TREES. 
 
-# data for first partition belonging to this gene tree
-gtreedataID.g <- function(g) {
-  a <- get.gtrees()[[g]]$first.partition
-  paste0("Data", ".", TheAnalysisStructure$alignment.table$alignments[[a]]$file)
-}
+
 
 
 geneTreeID.a <- function(a) {
   gtree <- TheAnalysisStructure$alignment.table$alignments[[a]]$gtree
-  paste0(gtree$kind, gtree$id)
+  xmlIDFromElement(gtree)
 }
 
 geneTreeID.g <- function(g) {
   gtree <- get.gtrees()[[g]]
-  paste0(gtree$kind, ".", gtree$id)
+  xmlIDFromElement(gtree)
 }
 
 
-# 
-# branchRM:List of 3
-# ..$ kind : chr "BranchRM"
-# ..$ id   : chr "1"
-# ..$ model:List of 3
-# .. ..$ kind: chr "StrictClock"
-# .. ..$ id  : chr "1"
-# .. ..$ rate: num 1
+
+geneTreeBranchRM <- function(g) {
+  gtree <- get.gtrees()[[g]]
+  xmlIDFromElement(gtree$branchRM$model)
+}
+
 
 
 geneTreeLhoodID <- function(g) {
   gtree <- get.gtrees()[[g]]
-  paste0("Lhood.", gtree$id)
+  paste0("GTreeLhood:", gtree$id)
 }
-
-
-
 
 
 geneTreeCoalFactorID.g <- function(g) {
   gtree <- get.gtrees()[[g]]
-  paste0("gTreeCF.", gtree$id)
+  paste0("GTreePloidy:", gtree$id)
 }
 
 
-
+# referred to in init to make random trees
 geneTaxonSetID.g <- function(g) {
   gtree <- get.gtrees()[[g]]
-  paste0("geneTaxonSet.", gtree$id)
+  paste0("GTreeTaxonSet:", gtree$id)
+}
+
+
+
+####################################################
+##### SITE MODELS
+
+
+sitemodelID.a  <- function(a) {
+  siteM <- TheAnalysisStructure$alignment.table$alignments[[a]]$siteM
+  xmlIDFromElement(siteM)
+}
+
+sitemodelID.u <- function(u) {
+  siteM <- get.siteMs()[[u]]
+  xmlIDFromElement(siteM)
+}
+
+# SITE HET
+
+sitehetMuID.a <- function(a) {
+  sitehet <- TheAnalysisStructure$alignment.table$alignments[[a]]$siteM$sitehet
+  stopifnot(is.character(sitehet$model))
+  if (sitehet$model == "None") {
+    paste0(sitehet$kind, ".mu.", sitehet$id)
+  } else {
+    #TODO 
+  }  
+}
+
+
+sitehetGammaShapeID.a <- function(a) {
+  sitehet <- TheAnalysisStructure$alignment.table$alignments[[a]]$siteM$sitehet
+  stopifnot(is.character(sitehet$model))
+  if (sitehet$model == "None") {
+    paste0(sitehet$kind, ".GammaShape.", sitehet$id)
+  } else {
+    #TODO 
+  }  
+}
+
+sitehetPropInvID.a <- function(a) {
+  sitehet <- TheAnalysisStructure$alignment.table$alignments[[a]]$siteM$sitehet
+  stopifnot(is.character(sitehet$model))
+  if (sitehet$model == "None") {
+    paste0(sitehet$kind, ".PropInv.", sitehet$id)
+  } else {
+    #TODO 
+  }  
 }
 
 
 
 
+# SUBSTITUTION MODELS 
 
-# TODO SITE HET
+substsmodelID.a <- function(a) {
+  model <- TheAnalysisStructure$alignment.table$alignments[[a]]$siteM$subst$model
+  xmlIDFromElement(model)
+}
 
-
-# SUBSTITUTION MODELS substsID.u(u) is u'th ID in alignment table
-
-substsID.u <- function(u) {
-  substs <- get.siteMs()
-  stopifnot(u <= length(substs))
-  paste0(substs[[u]]$kind, ".", substs[[u]]$id)
+substsmodelID.u <- function(u) {
+  model <- get.siteMs()[[u]]$subst$model
+  xmlIDFromElement(model)
 }
 
 
 kappaID.a <- function(a) {
-  subst <- TheAnalysisStructure$alignment.table$alignments[[a]]$siteM$subst
-  paste0(subst$model$kind, subst$model$kappa$id)
+  model <- TheAnalysisStructure$alignment.table$alignments[[a]]$siteM$subst$model
+  xmlIDfromKindID(model$kind, model$kappa$id)
 }
 
 kappaID.u <- function(u) { 
-  subst <- get.siteMs()[[u]]$subst
-  paste0(subst$model$kind, subst$model$kappa$id)
-}
-
-frequenciesID.a <- function(a) {
-  subst <- TheAnalysisStructure$alignment.table$alignments[[a]]$siteM$subst
-  paste0(subst$model$kind, subst$model$freqs$id)
-}
-
-frequenciesID.u <- function(u) {
-  subst <- get.siteMs()[[u]]
-  paste0(subst$model$kind, subst$model$freqs$id)
+  model <- get.siteMs()[[u]]$subst$model
+  xmlIDfromKindID(model$kind, model$kappa$id)
 }
 
 
+# there are two things that are 'frequencies'. model, param, i think
+# <frequencies frequencies="@freqParameter.s:U2SQg5t10r1-1" id="estimatedFreqs.s:U2SQg5t10r1-1" spec="Frequencies"/>
 
-# CLOCK MODELS clocksID.c(c) is c'th ID in alignment table
 
-clocksID.c <- function(c) {
-  clocks <- get.clocks()
-  stopifnot(c <= length(clocks))
-  clocks[[c]]$id
+frequenciesModelID.a <- function(a) {
+  model <- TheAnalysisStructure$alignment.table$alignments[[a]]$siteM$subst$model
+  xmlIDFromElement(model)
 }
-  
+
+
+frequenciesParamID.a <- function(a) {
+  model <- TheAnalysisStructure$alignment.table$alignments[[a]]$siteM$subst$model
+  xmlIDfromKindID(model$kind, model$freqs$id)
+}
+
+frequenciesParamID.u <- function(u) {
+  model <- get.siteMs()[[u]]$subst$model
+  xmlIDfromKindID(model$kind, model$freqs$id)
+}
+
+
+
+# CLOCK RATES (RELATIVE PARTITION RATES)
+
 clockRateID.a <- function(a) {
-  paste0("frequencies.", TheAnalysisStructure$alignment.table$alignments[[a]]$clock$id)
+  paste0("clockRate:", TheAnalysisStructure$alignment.table$alignments[[a]]$clock$id)
 }  
   
 clockRateID.c <- function(c) {
   clocks <- get.clocks()
   stopifnot(c <= length(clocks))
-  paste0("clockRate.", clocks[[c]]$id)
+  paste0("clockRate:", clocks[[c]]$id)
 }
 
 
@@ -186,48 +337,61 @@ clockRateID.c <- function(c) {
 # OPERATORS
 # STACEY
 
-nodesNudgeID <- function() { "nodesNudge" }
-coordinatedPruneRegraftID <- function() { "coordinatedPruneRegraft" }
-focusedScalerID <- function() { "focusedScaler" }
-popSFScalerID <- function() { "popSFScaler" }
-bdcGrowthScalerID <- function() { "bdcGrowthScaler" }
-bdcReldeathScalerID <- function() { "bdcReldeathScaler" }
-bdcCollapseWtScalerID <- function() { "bdcCollapseWtScaler" }
-bdcOriginHtScalerID <- function() { "bdcOriginHtScaler" }
+nodesNudgeID <- function() { "Operator:nodesNudge" }
+coordinatedPruneRegraftID <- function() { "Operator:coordinatedPruneRegraft" }
+focusedScalerID <- function() { "Operator:focusedScaler" }
+popSFScalerID <- function() { "Operator:popSFScaler" }
+bdcGrowthScalerID <- function() { "Operator:bdcGrowthScaler" }
+bdcReldeathScalerID <- function() { "Operator:bdcReldeathScaler" }
+bdcCollapseWtScalerID <- function() { "Operator:bdcCollapseWtScaler" }
+bdcOriginHtScalerID <- function() { "Operator:bdcOriginHtScaler" }
 
 
 # STANDARD: for smcTree
-nodeReheightID <- function() { "nodeReheight" }
+nodeReheightID <- function() { "Operator:nodeReheight" }
 
 # STANDARD: for gene trees
-clockRateScalerID <- function(g) { paste0("clockRateScaler.", g) }
-treeScalerID <- function(g) { paste0("treeScaler.", g) }
-treeRootScalerID <- function(g) { paste0("treeRootScaler.", g) }
-upClock.downHeightsID <- function(g) { paste0("upClock.downHeights.", g) }
+clockRateScalerID <- function(g) { paste0("Operator:clockRateScaler.", g) }
+treeScalerID <- function(g) { paste0("Operator:treeScaler.", g) }
+treeRootScalerID <- function(g) { paste0("Operator:treeRootScaler.", g) }
+upClock.downHeightsID <- function(g) { paste0("Operator:upClock.downHeights.", g) }
 
-subtreeSlideID <- function(g) { paste0("subtreeSlide.", g) }
-treeScalerID <- function(g) { paste0("treeScaler.", g) }
-wideID <- function(g) { paste0("wide.", g) }
-narrowID <- function(g) { paste0("narrow.", g) }
-WilsonBaldingID <- function(g) { paste0("WilsonBalding.", g) }
-uniformID <- function(g) { paste0("uniform.", g) }
+subtreeSlideID <- function(g) { paste0("Operator:subtreeSlide.", g) }
+treeScalerID <- function(g) { paste0("Operator:treeScaler.", g) }
+wideID <- function(g) { paste0("Operator:wide.", g) }
+narrowID <- function(g) { paste0("Operator:narrow.", g) }
+WilsonBaldingID <- function(g) { paste0("Operator:WilsonBalding.", g) }
+uniformID <- function(g) { paste0("Operator:uniform.", g) }
 
-kappaScalerID.u <- function(u) { paste0("kappaScaler.", u) }
-frequenciesExchangerID <- function(g) { paste0("frequenciesExchanger.", g) }
+kappaScalerID.u <- function(u) { paste0("Operator:kappaScaler.", u) }
+frequenciesExchangerID <- function(g) { paste0("Operator:frequenciesExchanger.", g) }
 
 
 # STANDARD: for smcTree and gene trees
-upGrowthClocks.downPopsHeightsID  <- function() { "upGrowthClocks.downPopsHeights" }
+upGrowthClocks.downPopsHeightsID  <- function() { "Operator:upGrowthClocks.downPopsHeights" }
 
 
-IDtoREF <- function(ID) {
-  paste0("@", ID)
+
+#############################################################################
+
+
+mainloggerID <- function() {
+  "Logger:trace"
 }
 
 
+smctreeloggerID <- function() {
+  "Logger:smcTree"
+}
 
 
+gtreeloggerID <- function(g) {
+  paste0("Logger:gtree.", g)
+}
 
 
+screenloggerID <- function() {
+  "Logger:trace"
+}
 
 

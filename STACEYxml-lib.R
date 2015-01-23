@@ -4,6 +4,8 @@
 #
 
 library(XML)
+library(stringr)
+library(ape)
 
 source("STACEYxml-libutil-addnodes.R")
 source("STACEYxml-libutil-priors.R")

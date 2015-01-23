@@ -307,8 +307,8 @@ PartitionRate <- function(id, rate=NULL) {
 
 
 
-SiteModel <- function(id, subst=NULL, site=NULL) {
-  x <- list(kind="SiteModel", id=id, subst=subst, site=site)
+SiteModel <- function(id, subst=NULL, sitehet=NULL) {
+  x <- list(kind="SiteModel", id=id, subst=subst, sitehet=sitehet)
   if (real.kids(x)) {
     insert(x)  
   }

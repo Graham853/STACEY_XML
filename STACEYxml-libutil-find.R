@@ -1,7 +1,6 @@
 
-
 nof.alignments <- function() {
-  length(TheAnalysisStructure$alignment.table)
+  length(TheAnalysisStructure$alignment.table$alignments)
 }
 
 
@@ -49,126 +48,54 @@ get.smct.popsf.fixed <- function() {
 }
 
 
-AlignmentIndexToGtreeIndex <- NULL
-TheGtreeModels <- NULL 
-
-AlignmentIndexToClockIndex <- NULL
-TheClockModels <- NULL
-
-AlignmentIndexToSiteIndex <- NULL
-TheSiteModels <- NULL 
-
 
 
 
 get.gtrees <- function() {
-  if (is.null(TheGtreeModels)) {
-    gtrees <- NULL
-    gtreeids <- character(0)
-    for (a in 1:nof.alignments()) {
-      gtree <- TheAnalysisStructure$alignment.table$alignments[[a]]$gtree
-      if (length(which(gtreeids==gtree$id)) == 0) {
-        gtreeids <- c(gtreeids, gtree$id)
-        gtree.aug <- c(gtree, list(first.partition=a))
-        gtrees <- c(gtrees, list(gtree.aug))
-      }
+  gtrees <- NULL
+  gtreeids <- character(0)
+  for (a in 1:nof.alignments()) {
+    gtree <- TheAnalysisStructure$alignment.table$alignments[[a]]$gtree
+    if (length(which(gtreeids==gtree$id)) == 0) {
+      gtreeids <- c(gtreeids, gtree$id)
+      gtree.aug <- c(gtree, list(first.partition=a))
+      gtrees <- c(gtrees, list(gtree.aug))
     }
-    TheGtreeModels <<- gtrees
   }
-  TheGtreeModels
+  gtrees
 }
-  
-
-
-
-# g.of.alignment <- function(a) {
-#   if (is.null(AlignmentIndexToGtreeIndex)) {
-#     AlignmentIndexToGtreeIndex <- rep(-1, nof.alignments())
-#     gtrees <- get.gtrees()
-#     for (a in 1:nof.alignments()) {
-#       gte <- TheAnalysisStructure$alignment.table$alignments[[a]]$gtree
-#       for (g in 1:length(gtrees)) {
-#         if (gte$id == gtrees[[g]]$id) {
-#           AlignmentIndexToGtreeIndex[a] <- g
-#         }
-#       }
-#     }
-#   }
-#   AlignmentIndexToGtreeIndex[a]
-# }
 
 
 
 
 get.clocks <- function() {
-  if (is.null(TheClockModels)) {
-    clocks <- NULL
-    clockids <- character(0)
-    for (a in 1:nof.alignments()) {
-      clock <- TheAnalysisStructure$alignment.table$alignments[[a]]$clock
-      if (length(which(clockids==clock$id)) == 0) {
-        clockids <- c(clockids, clock$id)
-        clocks <- c(clocks, list(clock))
-      }
+  clocks <- NULL
+  clockids <- character(0)
+  for (a in 1:nof.alignments()) {
+    clock <- TheAnalysisStructure$alignment.table$alignments[[a]]$clock
+    if (length(which(clockids==clock$id)) == 0) {
+      clockids <- c(clockids, clock$id)
+      clocks <- c(clocks, list(clock))
     }
-    TheClockModels <<- clocks
   }
-  TheClockModels
+  clocks
 }
 
 
 
 get.siteMs <- function() {
-  if (is.null(TheSiteModels)) {
-    siteMs <- NULL
-    siteMids <- character(0)
-    for (a in 1:nof.alignments()) {
-      sbt <- TheAnalysisStructure$alignment.table$alignments[[a]]$siteM
-      if (length(which(siteMids==sbt$id)) == 0) {
-        siteMids <- c(siteMids, sbt$id)
-        siteMs <- c(siteMs, list(sbt))
-      }
+  siteMs <- NULL
+  siteMids <- character(0)
+  for (a in 1:nof.alignments()) {
+    siteM <- TheAnalysisStructure$alignment.table$alignments[[a]]$siteM
+    if (length(which(siteMids==siteM$id)) == 0) {
+      siteMids <- c(siteMids, siteM$id)
+      siteM.aug <- c(siteM, list(first.partition=a))
+      siteMs <- c(siteMs, list(siteM.aug))        
     }
-    TheSiteModels <<- siteMs
   }
-  TheSiteModels
+  siteMs
 }
 
 
-# TODO need b.of.gtree()
-# b.of.alignment <- function(a) {
-#   if (is.null(AlignmentIndexToSubstIndex)) {
-#     AlignmentIndexToSubstIndex <- rep(-1, nof.alignments())
-#     substs <- get.substs()
-#     for (a in 1:nof.alignments()) {
-#       sbt <- TheAnalysisStructure$alignment.table$alignments[[a]]$subst
-#       for (g in 1:length(substs)) {
-#         if (sbt$id == substs[[g]]$id) {
-#           AlignmentIndexToSubstIndex[a] <- g
-#         }
-#       }
-#     }
-#   }
-#   AlignmentIndexToSubstIndex[a]
-# }
-
-
-
-# TODO need h.of.gtree()
-
-# h.of.alignment <- function(a) {
-#   if (is.null(AlignmentIndexToSiteHetIndex)) {
-#     AlignmentIndexToSiteHetIndex <- rep(-1, nof.alignments())
-#     sitehets <- get.sitehets()
-#     for (a in 1:nof.alignments()) {
-#       gte <- TheAnalysisStructure$alignment.table$alignments[[a]]$sitehet
-#       for (g in 1:length(sitehets)) {
-#         if (gte$id == sitehets[[g]]$id) {
-#           AlignmentIndexToSiteHetIndex[a] <- g
-#         }
-#       }
-#     }
-#   }
-#   AlignmentIndexToSiteHetIndex[a]
-# }
 

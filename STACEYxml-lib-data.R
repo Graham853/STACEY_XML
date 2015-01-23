@@ -1,15 +1,21 @@
 
+#<sequence id="seq_b05_A1" taxon="b05_A" totalcount="4" value="aaa
 
 add.data <- function(A) {
-  # TODO read from nex and A
-  add.opennode("data", attrs=c(name="alignment", id = "partition.1"))
-  add.node("sequence", attrs=c(id="b01.g1", value="?", totalcount="4", taxon="b01"))
-  add.node("sequence", attrs=c(id="b02.g1", value="?", totalcount="4", taxon="b02"))
-  add.node("sequence", attrs=c(id="b03.g1", value="?", totalcount="4", taxon="b03"))
-  add.closetag()
+  # TODO read the actual nex files. taxons from files
+  alignments <- A$alignment.table$alignments
+  for (a in 1:length(alignments)) {
+    xxx <- read.nexus.data(alignments[[a]]$file)
+    taxonnames <- names(xxx)
+    add.opennode("data", attrs=c(name="alignment", id=partitiondataID.a(a)))
+    for (q in 1:length(xxx)) {
+      seq <- paste(xxx[[q]], collapse="")
+      taxonname <- taxonnames[q]
+      add.node("sequence", attrs=c(id=sequenceID.a(a, taxonname), taxon=taxonname, totalcount="4", value=seq))
+    }
+    add.closetag()
+  }
+
 }
-
-
-
 
 
