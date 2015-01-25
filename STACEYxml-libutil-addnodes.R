@@ -1,11 +1,15 @@
 
-add.node <- function(...) {
-  TheSTACEYxmlTree$addNode(...)
+add.node <- function(name, attrs) {
+  TheSTACEYxmlTree$addNode(name=name, attrs=attrs)
+}
+
+add.node.children <- function(name, attrs, children) {
+  TheSTACEYxmlTree$addNode(name=name, attrs=attrs, .children=children)
 }
 
 
-add.opennode <- function(...) {
-  TheSTACEYxmlTree$addNode(..., close=FALSE)
+add.opennode <- function(name, attrs) {
+  TheSTACEYxmlTree$addNode(name=name, attrs=attrs, close=FALSE)
 }
 
 add.closetag <- function() {
@@ -22,29 +26,27 @@ add.comment <- function(txt) {
 
 
 add.bigcomment <- function(txt) {
-  fullline <- paste0(rep("~", 45), collapse="") 
-  halftextlen <- as.integer(round(nchar(txt)/2))
-  if (halftextlen > 22) { halftextlen <- 22}
-  partline <- paste0(rep("~", 23 - halftextlen), collapse="")
-  TheSTACEYxmlTree$addComment(fullline)
-  TheSTACEYxmlTree$addComment(paste0(partline, " ", txt, " ", partline))
-  TheSTACEYxmlTree$addComment(fullline)
+  add.surrounded.comment(txt, 1)
 }
 
 
 add.hugecomment <- function(txt) {
-  xline <- paste0(rep("~", 45), collapse="")
-  emptyline <- paste0(rep("~", 45), collapse="")
-  partline <- paste0(rep("~", 23 - as.integer(round(nchar(txt)/2))), collapse="")
-  TheSTACEYxmlTree$addComment(xline)
-  TheSTACEYxmlTree$addComment(emptyline)
-  TheSTACEYxmlTree$addComment(emptyline)
-  TheSTACEYxmlTree$addComment(paste0(partline, " ", txt, " ", partline))
-  TheSTACEYxmlTree$addComment(emptyline)
-  TheSTACEYxmlTree$addComment(emptyline)
-  TheSTACEYxmlTree$addComment(xline)
+  add.surrounded.comment(txt, 3)
 }
 
 
+add.surrounded.comment <- function(txt, n) {
+  fullline <- "~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~"
+  halftextlen <- as.integer(floor(nchar(txt)/2))
+  if (halftextlen > 32) { halftextlen <- 32}
+  partline <- paste0(rep("~ ", (36 - halftextlen)/2), collapse="")
+  for (i in 1:n) {
+    TheSTACEYxmlTree$addComment(fullline)
+  }
+  TheSTACEYxmlTree$addComment(paste0(partline, " ", txt, " ", partline, "~"))
+  for (i in 1:n) {
+    TheSTACEYxmlTree$addComment(fullline)
+  } 
+}
 
 

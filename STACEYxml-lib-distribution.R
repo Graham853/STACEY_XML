@@ -2,7 +2,6 @@
 
 
 add.distribution <- function(A) {
-  # TODO id as function
   add.opennode("distribution", attrs=c(id=posteriorID(), spec="util.CompoundDistribution")) 
   add.coalescent.distribution(A)
   add.prior.distribution(A)
@@ -19,9 +18,8 @@ add.coalescent.distribution <- function(A) {
   add.opennode("distribution", attrs=attrs)
   gtrees <- get.gtrees()
   for (g in 1:length(gtrees)) {
-    # TODO ploidy
     attrs <- c(id=geneTreeCoalFactorID.g(g), spec="stacey.GtreeAndCoalFactor", 
-               tree=IDtoREF(geneTreeID.g(g)), Ploidy="2.0")
+               tree=IDtoREF(geneTreeID.g(g)), Ploidy=gtrees[[g]]$ploidy)
     add.node("geneTree", attrs=attrs)
   }
   
@@ -83,10 +81,10 @@ add.sitemodel <- function(A, a) {
   if (first > 0) {
     add.opennode("siteModel", attrs=c(id=sitemodelID.a(a), spec="SiteModel"))
     if (siteM$sitehet$model == "None") {
-      add.node("parameter", attrs=c(id=sitehetMuID.a(a), name="mutationRate", estimate="false"), .children="1.0")
-      add.node("parameter", attrs=c(id=sitehetGammaShapeID.a(a), name="shape", estimate="false"), .children="1.0")
+      add.node.children("parameter", attrs=c(id=sitehetMuID.a(a), name="mutationRate", estimate="false"), children="1.0")
+      add.node.children("parameter", attrs=c(id=sitehetGammaShapeID.a(a), name="shape", estimate="false"), children="1.0")
       attrs <- c(id=sitehetPropInvID.a(a), name="proportionInvariant", estimate="false", lower="0.0", upper="1.0")
-      add.node("parameter", attrs=attrs, .children="0.0")
+      add.node.children("parameter", attrs=attrs, children="0.0")
       
       add.opennode("substModel", attrs=c(id=substsmodelID.a(a), kappa=IDtoREF(kappaID.a(a)), spec="HKY"))
       attrs <- c(id=frequenciesModelID.a(a), frequencies=IDtoREF(frequenciesParamID.a(a)), spec="Frequencies")
@@ -152,7 +150,7 @@ add.branchratemodel <- function(a) {
     attrs <- c(id=scID, spec="beast.evolution.branchratemodel.StrictClockModel")
     add.opennode("branchRateModel", attrs=attrs)
     attrs <- c(id=clockRateID.a(a), estimate="false", name="clock.rate")
-    add.node("parameter", attrs=attrs, .children="1.0")
+    add.node.children("parameter", attrs=attrs, children="1.0")
     add.closetag()
   } else {
     # else refer to existing clock rate

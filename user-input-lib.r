@@ -35,7 +35,14 @@ TheAnalysis <- function(id, data.dpath, alignment.table, taxa.table, run.options
 
 
 
-
+# This is a recursive search for the pair (kind,id). More precisecly, it looks
+# for a list with elements named 'kind' and 'id' which match the arguments.
+# If want.unfilled is FALSE, the first such list is returned.
+# If want.unfilled is TRUE, there must be a NULL in the list to match.
+# The location of a list is stored in the integer vector indices.
+# A failure to find a match is indicated by either length(indices)==0, or 
+# the last element of indices being -1.
+# TODO currently only used with want.unfilled==TRUE.
 sub.locate <- function(kind, id, want.unfilled, lst, indices) {
   if (!is.list(lst)) {
     #cat("1.", indices, "\n")
@@ -226,8 +233,8 @@ make.ki <- function(A, kinds, ids) {
 
 
 
-Gtree <- function(id, prior=NULL, branchRM=NULL) {
-  x <- list(kind="Gtree", id=id, prior=prior, branchRM=branchRM)
+Gtree <- function(id, prior=NULL, branchRM=NULL, ploidy=NULL) {
+  x <- list(kind="Gtree", id=id, prior=prior, branchRM=branchRM, ploidy=ploidy)
   if (real.kids(x)) {
     insert(x)  
   }

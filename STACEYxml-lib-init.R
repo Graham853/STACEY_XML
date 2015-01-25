@@ -9,7 +9,7 @@ add.init <- function(A) {
   sm.attrs <- c(id=initialsmctreepopmodelID(), spec="ConstantPopulation")
   add.opennode("populationModel", attrs=sm.attrs)
   sp.attrs <- c(id=initialsmctreepopsizeID(), name="popSize")
-  add.node("parameter", attrs=sp.attrs, .children="0.05")
+  add.node.children("parameter", attrs=sp.attrs, children="0.05")
   add.closetag()
   add.closetag()
   
@@ -23,7 +23,7 @@ add.init <- function(A) {
     gm.attrs <- c(id=initialgtreepopmodelID(g), spec="ConstantPopulation")
     add.opennode("populationModel", attrs=gm.attrs)
     gp.attrs <- c(id=initialgtreepopsizeID(g), name="popSize")
-    add.node("parameter", attrs=gp.attrs, .children="0.05")
+    add.node.children("parameter", attrs=gp.attrs, children="0.05")
     add.closetag()
     add.closetag() 
   }

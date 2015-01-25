@@ -1,16 +1,41 @@
-setwd("C:/Users/Work/AAA/Programming/biology/STACEY_XML")
-source("user-input-lib.r")
-source("STACEYxml-lib.r")
 
-Rprof()
 
-alignment.table <- list(
-  partition1=list(file="U1.nex", gtree=Gtree("1"), clock=Clock("1"), siteM=SiteModel("1")),
-  partition2=list(file="U2.nex", gtree=Gtree("2"), clock=Clock("2"), siteM=SiteModel("2")),
-  partition3=list(file="U3.nex", gtree=Gtree("3"), clock=Clock("3"), siteM=SiteModel("3")),
-  partition4=list(file="U4.nex", gtree=Gtree("4"), clock=Clock("4"), siteM=SiteModel("4")),
-  partition5=list(file="U5.nex", gtree=Gtree("5"), clock=Clock("5"), siteM=SiteModel("5"))
-)
+
+RcodeSourceDirectory <- "C:/Users/Work/AAA/Programming/biology/STACEY_XML"
+
+library(XML)
+library(stringr)
+library(ape)
+
+source(paste0(RcodeSourceDirectory, "/", "user-input-lib.r"))
+source(paste0(RcodeSourceDirectory, "/", "STACEYxml-lib.r"))
+
+source(paste0(RcodeSourceDirectory, "/", "STACEYxml-libutil-addnodes.R"))
+source(paste0(RcodeSourceDirectory, "/", "STACEYxml-libutil-priors.R"))
+source(paste0(RcodeSourceDirectory, "/", "STACEYxml-libutil-ids.R"))
+source(paste0(RcodeSourceDirectory, "/", "STACEYxml-libutil-find.R"))
+
+source(paste0(RcodeSourceDirectory, "/", "STACEYxml-lib-data.R"))
+source(paste0(RcodeSourceDirectory, "/", "STACEYxml-lib-distribution.R"))
+source(paste0(RcodeSourceDirectory, "/", "STACEYxml-lib-init.R"))
+source(paste0(RcodeSourceDirectory, "/", "STACEYxml-lib-loggers.R"))
+source(paste0(RcodeSourceDirectory, "/", "STACEYxml-lib-operators.R"))
+source(paste0(RcodeSourceDirectory, "/", "STACEYxml-lib-run.R"))
+source(paste0(RcodeSourceDirectory, "/", "STACEYxml-lib-state.R"))
+
+
+
+
+nloci <- 5
+alignment.table <- NULL
+for (i in 1:nloci) {
+  file <- paste0("seqs", sprintf("%02d", i), ".nex")
+  id <- paste0(i)
+  partition <- list(file=file, gtree=Gtree(id), clock=Clock(id), siteM=SiteModel(id))
+  alignment.table <- c(alignment.table, list(partition))
+}
+names(alignment.table) <- paste0("partition", 1:nloci)
+
 
 taxa.table <- rbind(
   c("a01_A", "a"),
@@ -43,14 +68,15 @@ run.options <- list(
   gtrees.logevery=1000,
   screen.logevery=10000
   )          
-TheAnalysis("Test.1", data.dpath="C:/...", alignment.table, taxa.table, run.options)
+TheAnalysis("Test.1", data.dpath="C:/Users/Work/AAA/Programming/biology/STACEY_XML/Tests", 
+            alignment.table, taxa.table, run.options)
 
 ########################################
 
 gtrees <- get.gtrees()
 for (i in 1:length(gtrees)) {
   id <- gtrees[[i]]$id
-  Gtree(id, SMCtree("smctree"), BranchRM(id))
+  Gtree(id, SMCtree("smctree"), BranchRM(id), 2.0)
   BranchRM(id, StrictClock(id))
   StrictClock(id, 1.0)
 }
@@ -98,15 +124,14 @@ for (i in 1:length(siteMs)) {
 }
 
 
+
+
 xmlTree.from.analysis.structure(TheAnalysisStructure)
-saveXML(TheSTACEYxmlTree$value(), file="test.xml")
 
-Rprof(NULL)
+saveXML(TheSTACEYxmlTree$value(), file=paste0(TheAnalysisStructure$data.dpath, "/test.xml"))
 
-sink(file="test.txt")
+sink(file=paste0(TheAnalysisStructure$data.dpath, "/test.txt"))
 str(TheAnalysisStructure)
 sink(NULL)
-
-#str(TheAnalysisStructure$alignment.table$alignments[[1]]$gtree$prior)
 
 

@@ -7,10 +7,6 @@ IDtoREF <- function(ID) {
 }
 
 
-prior.of.first.gtree <- function() {
-  TheAnalysisStructure$alignment.table$alignments[[1]]$gtree$prior
-}
-
 
 xmlIDFromElement  <- function(x) {
   stopifnot(is.character(x$kind))
@@ -41,6 +37,8 @@ dataID.a <- function(a) {
   }
   id
 }
+
+
 
 ############ ID FUNCTIONS
 

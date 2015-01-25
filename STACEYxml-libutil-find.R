@@ -5,6 +5,12 @@ nof.alignments <- function() {
 
 
 
+prior.of.first.gtree <- function() {
+  TheAnalysisStructure$alignment.table$alignments[[1]]$gtree$prior
+}
+
+
+
 get.taxa.table <- function() {
   TheAnalysisStructure$taxa.table$taxa.table
 }
@@ -17,9 +23,11 @@ get.minclusters <- function() {
 }
 
 
+
+
+
 get.bdc.model <- function() {
-  # TODO not good that access first gtree for all
-  TheAnalysisStructure$alignment.table$alignments[[1]]$gtree$prior$branching
+  prior.of.first.gtree()$branching
 }
 
 
@@ -39,8 +47,7 @@ get.bdcm.w.fixed <- function() {
 
 
 get.smc.coalescent <- function() {
-  # TODO not good that access first gtree for all
-  TheAnalysisStructure$alignment.table$alignments[[1]]$gtree$prior$smccoal
+  prior.of.first.gtree()$smccoal
 }
 
 get.smct.popsf.fixed <- function() {

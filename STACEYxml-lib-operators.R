@@ -31,8 +31,8 @@ add.operators <- function(A) {
   add.bigcomment("Operators for the trees for each locus")
   gtrees <- get.gtrees()
   for (g in 1:length(gtrees)) {
-    if (nofmcs > 2) { 
-      #TODO should be nof sequences for gene
+    a <- get.gtrees()[[g]]$first.partition
+    if (length(TheAlignmentData$all.sequences[[a]]) > 2) { 
       add.comment(paste0("topology-changing ops for tree for locus ", g)) 
       add.subtreeSlide(g, gtreewweight(15)) 
       add.narrowExchange(g, gtreewweight(15)) 
@@ -58,7 +58,6 @@ add.operators <- function(A) {
   
   siteMs <- get.siteMs() 
   for (u in 1:length(siteMs)) {
-    # TODO what does u index? site models? OK?
     add.comment(paste0("kappas and frequencies ops for subst model ", u))
     #TODO other subst models
     add.general.scaleOperator(kappaScalerID.u(u), kappaID.u(u), 0.5, gtreewweight(2))

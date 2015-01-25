@@ -2,11 +2,16 @@
 
 
 add.loggers <- function(A) {
+  add.bigcomment("Main logger for parameters (Trace file)")
   add.main.logger(A)
-#   add.smctree.logger(A)
-#   for (g in 1:A$nloci) {
-#     add.gtree.logger(A, g)
-#   }
+  add.bigcomment("Logger for the species or minimal clusters tree")
+  add.smctree.logger(A)
+  gtrees <- get.gtrees()
+  add.bigcomment(paste0("Loggers for ", length(gtrees), " gene trees"))
+  for (g in 1:length(gtrees)) {
+    add.gtree.logger(A, g)
+  }
+  add.bigcomment("Logger for screen")
   add.screen.logger(A)
 }
 
@@ -40,7 +45,6 @@ add.main.logger <- function(A) {
   add.node("log", attrs=c(spec="stacey.PopSampleStatistic", 
                           popPriorScale=IDtoREF(popSFID()), piomsCoalDist=IDtoREF(smcCoalescentID())))
 
-  # TODO Depends on which clocks, substs, are used
   clocks <- get.clocks()
   gtrees <- get.gtrees()
   siteMs <- get.siteMs()
@@ -57,7 +61,6 @@ add.main.logger <- function(A) {
   
   add.comment("Substitution model parameters")
   for (u in 1:length(siteMs)) {
-    # TODO what does u index? site models? OK?
     add.node("parameter", attrs=c(idref=kappaID.u(u), name="log"))
     add.node("parameter", attrs=c(idref=frequenciesParamID.u(u), name="log"))
     }
@@ -81,61 +84,28 @@ add.screen.logger <- function(A) {
 
 
 
-# smctreeloggerID() 
-# gtreeloggerID(g)
-# 
 
- 
- # smctree.logevery=1000,
-#  add.smctree.logger <- function(A) {
-#   #sampledspptrees.fpath
-#   catln(1, "<logger",
-#         id("smcTreeLogger"),
-#         namevalue("fileName", sim.options$sampledspptrees.fpath),
-#         namevalue("logEvery", sim.options$beastspptree.logevery),
-#         namevalue("mode", "tree"), ">")
-#   catln(2, "<log", 
-#         id("TreeWithMetaDataLogger.smc"),
-#         spec("beast.evolution.tree.TreeWithMetaDataLogger"),
-#         namevalue("tree", IDtoREF(smcTreeID())), "/>")
-#   catln(1, "</logger>")
-#   
-#   # TODO: do I need this? My smcTree is a plain tree, no demographics
-#   #   <log id="SpeciesTreeLoggerX" 
-#   #   popSize="@popSize" 
-#   #   popSizeTop="@popSizeTop" 
-#   #   spec="beast.evolution.speciation.SpeciesTreeLogger" 
-#   #   speciesTreePrior="@SpeciesTreePopSize.Species"
-#   #   tree="@Tree.t:Species"> 
-#   #   <treetop id="treeTopFinder" spec="beast.evolution.speciation.TreeTopFinder">
-#   #   <tree idref="Tree.t:29"/>
-#   #   <tree idref="Tree.t:26"/>
-#   #   </treetop>
-#   #   </log>
-#   
-#   
-#   
-# }
-# 
-# 
-#   gtrees.logevery=1000,
-# add.gtree.logger <- function(A, g) {
-#   catln(1, "<logger",
-#         id(paste0("geneTreeLogger.", g)),
-#         namevalue("fileName", paste0(sim.options$sampledgtrees.fpathbase, g, ".txt")),
-#         namevalue("logEvery", sim.options$beastgtrees.logevery),
-#         namevalue("mode", "tree"), ">")
-#   catln(2, "<log", 
-#         id(paste0("TreeWithMetaDataLogger.", g)),
-#         spec("beast.evolution.tree.TreeWithMetaDataLogger"),
-#         namevalue("tree", IDtoREF(geneTreeID(g))), "/>")
-#   catln(1, "</logger>")
-# }
-# 
-# 
+add.smctree.logger <- function(A) {
+  fpath <- A$run.options$opts$sampledsmctrees.fpath
+  logevery <- A$run.options$opts$smctree.logevery  
+  attrs <- c(id=smctreeloggerID(), fileName=fpath, logEvery=logevery, mode="tree")
+  add.opennode("logger", attrs=attrs)
+  add.node("log", attrs=c(spec="beast.evolution.tree.TreeWithMetaDataLogger", tree=IDtoREF(smcTreeID())))
+  add.closetag()
+}
 
 
 
+add.gtree.logger <- function(A, g) {
+  gtrees <- get.gtrees()
+  gtid <- gtrees[[g]]$id
+  fpath <- paste0(A$run.options$opts$sampledgtrees.fpathbase, "-", gtid, ".txt")
+  logevery <- A$run.options$opts$gtrees.logevery 
+  attrs <- c(id=gtreeloggerID(g), fileName=fpath, logEvery=logevery, mode="tree")
+  add.opennode("logger", attrs=attrs)
+  add.node("log", attrs=c(spec="beast.evolution.tree.TreeWithMetaDataLogger", tree=IDtoREF(geneTreeID.g(g))))
+  add.closetag()
+}
 
 
 
