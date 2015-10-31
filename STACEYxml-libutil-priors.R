@@ -2,9 +2,9 @@
 
 
 add.1Dprior <- function(prior, xREF) {
-  add.opennode("prior", attrs=c(name="distribution", x=xREF))
+  open.xmlnode("prior", attrs=c(name="distribution", x=xREF))
   add.ParametricDistribution(prior)
-  add.closetag()
+  close.xmlnode()
 }
 
 
@@ -24,6 +24,12 @@ add.ParametricDistribution <- function(prior) {
 }
 
 
+
+add.fixed.parameter <- function(id, name, value) {
+  add.xmlnode.children("parameter", attrs=c(id=id, name=name, estimate="false"), children=value) 
+}
+
+
 # <map name="Beta">beast.math.distributions.Beta</map>
 #   <map name="Exponential">beast.math.distributions.Exponential</map>
 #   <map name="InverseGamma">beast.math.distributions.InverseGamma</map>
@@ -35,41 +41,35 @@ add.ParametricDistribution <- function(prior) {
 #   <map name="Normal">beast.math.distributions.Normal</map>
 
 add.lnorm.prior <- function(prior) {
-  add.opennode("LogNormal", attrs=c(id=paste0("LogNormal.", prior$id), name="distr"))
-  attrs <- c(id=paste0("meanlog.", prior$id), name="M", estimate="false")
-  add.node.children("parameter", attrs=attrs, children=prior$meanlog)
-  attrs <- c(id=paste0("sdlog.", prior$id),   name="S", estimate="false")
-  add.node.children("parameter", attrs=attrs, children=prior$sdlog)
-  add.closetag()
+  open.xmlnode("LogNormal", attrs=c(id=paste0("LogNormal.", prior$id), name="distr"))
+  add.fixed.parameter(paste0("meanlog.", prior$id), "M", get.childvalue(prior, "meanlog"))
+  add.fixed.parameter(paste0("sdlog.", prior$id), "S", get.childvalue(prior, "sdlog"))
+  close.xmlnode()
 }
 
 
 add.beta.prior <- function(prior) {
-  add.opennode("Beta", attrs=c(id=paste0("Beta.", prior$id), name="distr"))
-  attrs <- c(id=paste0("alpha.", prior$id), name="alpha", estimate="false")
-  add.node.children("parameter", attrs=attrs, children=prior$alpha)
-  attrs <- c(id=paste0("beta.", prior$id), name="beta", estimate="false")
-  add.node.children("parameter", attrs=attrs, children=prior$beta)
-  add.closetag()
+  open.xmlnode("Beta", attrs=c(id=paste0("Beta.", prior$id), name="distr"))
+  add.fixed.parameter(paste0("alpha.", prior$id), "alpha", get.childvalue(prior, "a"))
+  add.fixed.parameter(paste0("beta.", prior$id), "beta", get.childvalue(prior, "b"))
+  close.xmlnode()
 }
 
 
 
 add.exp.prior <- function(prior) {
-  add.opennode("Exponential", attrs=c(id=paste0("Exponential.", prior$id), name="distr"))
+  open.xmlnode("Exponential", attrs=c(id=paste0("Exponential.", prior$id), name="distr"))
   #TODO mean or scale
-  add.closetag()
+  close.xmlnode()
 }
 
 
 # TODO something funny about uniform limits
 add.unif.prior <- function(prior) {
-  add.opennode("Uniform", attrs=c(id=paste0("Uniform.", prior$id), name="distr"))
-  attrs <- c(id=paste0("lower.", prior$id), name="lower", estimate="false")
-  add.node.children("parameter", attrs=attrs, children=prior$lower)
-  attrs <- c(id=paste0("upper.", prior$id), name="upper", estimate="false")
-  add.node.children("parameter", attrs=attrs, children=prior$upper)
-  add.closetag()
+  open.xmlnode("Uniform", attrs=c(id=paste0("Uniform.", prior$id), name="distr"))
+  add.fixed.parameter(paste0("lower.", prior$id), "lower", get.childvalue(prior, "lower"))
+  add.fixed.parameter(paste0("upper.", prior$id), "upper", get.childvalue(prior, "upper"))
+  close.xmlnode()
 }
 
 

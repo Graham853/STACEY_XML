@@ -1,17 +1,25 @@
 
 
-add.run <- function(A) {
-  add.opennode("run", attrs=c(id="mcmc", spec="MCMC", chainLength="1000000", storeEvery="500000"))
+add.run <- function() {
+  open.xmlnode("run", attrs=c(id="mcmc", spec="MCMC", 
+  														chainLength=get.runoption("chainlength"), 
+  														storeEvery=get.runoption("store.every")))
+  cat("done run\n")
   add.hugecomment("state")
-  add.state(A)
+  add.state()
+  cat("done state\n")
   add.hugecomment("init")
-  add.init(A)
+  add.init()
+  cat("done init\n")
   add.hugecomment("distribution")
-  add.distribution(A)
+  add.distribution()
+  cat("done distribution\n")
   add.hugecomment("operators")
-  add.operators(A)
+  add.operators()
+  cat("done operators\n")
   add.hugecomment("loggers")
-  add.loggers(A)
-  add.closetag()
+  add.loggers()
+  cat("done loggers\n")
+  close.xmlnode()
 }
 

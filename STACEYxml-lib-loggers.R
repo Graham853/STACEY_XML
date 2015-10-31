@@ -1,110 +1,145 @@
 
 
 
-add.loggers <- function(A) {
+add.loggers <- function() {
   add.bigcomment("Main logger for parameters (Trace file)")
-  add.main.logger(A)
+  add.main.logger(get.runoption("sampledparams.fpath"), 
+  								get.runoption("params.logevery"))
   add.bigcomment("Logger for the species or minimal clusters tree")
-  add.smctree.logger(A)
-  gtrees <- get.gtrees()
+  add.smctree.logger(get.runoption("sampledsmctrees.fpath"),
+  									 get.runoption("smctree.logevery"))
+  gtrees <- get.GTrees()
   add.bigcomment(paste0("Loggers for ", length(gtrees), " gene trees"))
   for (g in 1:length(gtrees)) {
-    add.gtree.logger(A, g)
+    add.gtree.logger(g,
+    								 get.runoption("sampledgtrees.fpathbase"),
+    								 get.runoption("gtrees.logevery"))
   }
   add.bigcomment("Logger for screen")
-  add.screen.logger(A)
+  add.screen.logger(get.runoption("screen.logevery"))
 }
 
- 
 
 
-add.main.logger <- function(A) {
-  add.opennode("logger", attrs=c(id=mainloggerID(), fileName=A$run.options$opts$sampledparams.fpath, 
-                             logEvery=A$run.options$opts$params.logevery, model="@posterior", sort="smart"))
+add.main.logger <- function(fpath, logevery) {
+  open.xmlnode("logger", attrs=c(id=mainloggerID(), fileName=fpath, 
+                             logEvery=logevery, model="@posterior", sort="smart"))
 
-  add.node("log", attrs=c(idref=posteriorID()))
-  add.node("log", attrs=c(idref=likelihoodID()))
-  add.node("log", attrs=c(idref=priorID()))
-  add.node("log", attrs=c(idref=smcCoalescentID()))
-  add.node("log", attrs=c(idref=popSFID()))
-  
-  add.comment("birth-death-collapse model and its parameters")
-  add.node("log", attrs=c(idref=bdcModelID()))
-  add.node("parameter", attrs=c(idref=bdcGrowthID(), name="log"))
-  add.node("parameter", attrs=c(idref=bdcRelDeathID(), name="log"))
-  add.node("parameter", attrs=c(idref=bdcCollapseWtID(), name="log"))
-  
-  add.comment("smcTree origin height")
-  add.node("parameter", attrs=c(idref=bdcOriginHtID(), name="log"))
-
-  add.comment("Statistic for number of clusters")
-  add.node("log", attrs=c(spec="stacey.BirthDeathCollapseNClustersStatistic", 
-                       bdcm=IDtoREF(bdcModelID()), smcTree=IDtoREF(smcTreeID())))
-  
-  add.comment("Statistic for population size")
-  add.node("log", attrs=c(spec="stacey.PopSampleStatistic", 
-                          popPriorScale=IDtoREF(popSFID()), piomsCoalDist=IDtoREF(smcCoalescentID())))
-
-  clocks <- get.clocks()
-  gtrees <- get.gtrees()
-  siteMs <- get.siteMs()
-  
+  add.centredcomment("Distributions")
+  add.comment("Posterior = likelihood * prior * coalescent")
+  add.xmlnode("log", attrs=c(idref=posteriorID()))
+  add.xmlnode("log", attrs=c(idref=likelihoodID()))
+  add.xmlnode("log", attrs=c(idref=priorID()))
+  add.xmlnode("log", attrs=c(idref=smcCoalescentID()))
+  add.comment("birth-death-collapse model")
+  add.xmlnode("log", attrs=c(idref=bdcModelID()))
+  gtrees <- get.GTrees()
   add.comment("Tree likelihoods for each locus")
   for (g in 1:length(gtrees)) {
-    add.node("log", attrs=c(idref=geneTreeLhoodID(g)))
+    add.xmlnode("log", attrs=c(idref=geneTreeLhoodID(g)))
   }
+  
+  # TODO The parameters section could be rewritten using get.all.parameters()
+  # in STACEYxml-libutil-find.R
+  add.centredcomment("Parameters")
+  add.comment("parameters for stacey coalescent and birth-death-collapse model")
+  add.xmlnode("log", attrs=c(idref=popSFID()))
+  bdc <- get.bdc.model()
+  bdc.g <- get.child(bdc, "growthrate")
+  bdc.rd <- get.child(bdc, "reldeath")
+  bdc.w <- get.child(bdc, "w")
+  if (is.estimated(bdc.g)) {
+    add.xmlnode("parameter", attrs=c(idref=bdcGrowthID(), name="log"))
+  }
+  if (is.estimated(bdc.rd)) {
+    add.xmlnode("parameter", attrs=c(idref=bdcRelDeathID(), name="log")) 
+  }
+  if (is.estimated(bdc.w)) {
+    add.xmlnode("parameter", attrs=c(idref=bdcCollapseWtID(), name="log")) 
+  }
+  add.xmlnode("parameter", attrs=c(idref=bdcOriginHtID(), name="log"))
 
+  clocks <- get.Clocks()
+  siteMs <- get.SiteMs()
   add.comment("clock rates (relative rates)")
-  for (c in 1:length(clocks)) {
-    add.node("parameter", attrs=c(idref=clockRateID.c(c), name="log"))
+  for (u in 1:length(clocks)) {
+  	prm <- get.child(clocks[[u]], "PartitionRateM")
+  	clkrate <- get.child(prm, "rate")
+    if (is.estimated(clkrate)) {
+      add.xmlnode("parameter", attrs=c(idref=clockRateID.u(u), name="log"))
+    }
   }
   
   add.comment("Substitution model parameters")
   for (u in 1:length(siteMs)) {
-    add.node("parameter", attrs=c(idref=kappaID.u(u), name="log"))
-    add.node("parameter", attrs=c(idref=frequenciesParamID.u(u), name="log"))
+  	substM <- get.child(siteMs[[u]], "SubstM")
+  	model <- get.child(substM, "model")
+    if (model$kind == "HKY") { 
+    	kappa <- get.childvalue(model, "kappa")
+    	freqs <- get.childvalue(model, "freqs")
+      if (is.numeric(kappa)) {
+        # fixed value, don't log
+      } else {
+        add.xmlnode("parameter", attrs=c(idref=kappaID.u(u), name="log"))
+      }
+      if (is.character(freqs)) {
+        # fixed value, don't log
+      } else {
+        add.xmlnode("parameter", attrs=c(idref=frequenciesParamID.u(u), name="log"))
+      }
+    } else {
+      # TODO
+      stop()
     }
-  add.closetag()
+  }
+
+  add.centredcomment("Statistics")
+  add.comment("Statistic for number of clusters")
+  add.xmlnode("log", attrs=c(spec="stacey.BirthDeathCollapseNClustersStatistic", 
+                          bdcm=IDtoREF(bdcModelID()), smcTree=IDtoREF(smcTreeID())))
+  
+  add.comment("Statistic for population size")
+  add.xmlnode("log", attrs=c(spec="stacey.PopSampleStatistic", 
+                          popPriorScale=IDtoREF(popSFID()), piomsCoalDist=IDtoREF(smcCoalescentID())))
+  
+  close.xmlnode()
 }
 
 
 
-add.screen.logger <- function(A) {
-  attrs = c(id=screenloggerID(), logEvery="1000", model=IDtoREF(posteriorID()))
-  add.opennode("logger", attrs=attrs)
-  add.node("log", attrs=c(idref=posteriorID()))
-  add.node("log", attrs=c(id="ESS.posterior", spec="util.ESS", arg=IDtoREF(posteriorID())))
-  add.node("log", attrs=c(idref=likelihoodID()))
-  add.node("log", attrs=c(idref=priorID()))
-  add.node("log", attrs=c(idref=smcCoalescentID()))
-  add.node("log", attrs=c(spec="stacey.BirthDeathCollapseNClustersStatistic",
+add.screen.logger <- function(logevery) {
+  attrs = c(id=screenloggerID(), logEvery=logevery, model=IDtoREF(posteriorID()))
+  open.xmlnode("logger", attrs=attrs)
+  add.xmlnode("log", attrs=c(idref=posteriorID()))
+  add.xmlnode("log", attrs=c(id="ESS.posterior", spec="util.ESS", arg=IDtoREF(posteriorID())))
+  add.xmlnode("log", attrs=c(idref=likelihoodID()))
+  add.xmlnode("log", attrs=c(idref=priorID()))
+  add.xmlnode("log", attrs=c(idref=smcCoalescentID()))
+  add.xmlnode("log", attrs=c(spec="stacey.BirthDeathCollapseNClustersStatistic",
                          bdcm=IDtoREF(bdcModelID()), smcTree=IDtoREF(smcTreeID())))
-  add.closetag()
+  close.xmlnode()
 }
 
 
 
 
-add.smctree.logger <- function(A) {
-  fpath <- A$run.options$opts$sampledsmctrees.fpath
-  logevery <- A$run.options$opts$smctree.logevery  
+add.smctree.logger <- function(fpath, logevery) {
   attrs <- c(id=smctreeloggerID(), fileName=fpath, logEvery=logevery, mode="tree")
-  add.opennode("logger", attrs=attrs)
-  add.node("log", attrs=c(spec="beast.evolution.tree.TreeWithMetaDataLogger", tree=IDtoREF(smcTreeID())))
-  add.closetag()
+  open.xmlnode("logger", attrs=attrs)
+  add.xmlnode("log", attrs=c(spec="beast.evolution.tree.TreeWithMetaDataLogger", tree=IDtoREF(smcTreeID())))
+  close.xmlnode()
 }
 
 
 
-add.gtree.logger <- function(A, g) {
-  gtrees <- get.gtrees()
-  gtid <- gtrees[[g]]$id
-  fpath <- paste0(A$run.options$opts$sampledgtrees.fpathbase, "-", gtid, ".txt")
-  logevery <- A$run.options$opts$gtrees.logevery 
-  attrs <- c(id=gtreeloggerID(g), fileName=fpath, logEvery=logevery, mode="tree")
-  add.opennode("logger", attrs=attrs)
-  add.node("log", attrs=c(spec="beast.evolution.tree.TreeWithMetaDataLogger", tree=IDtoREF(geneTreeID.g(g))))
-  add.closetag()
+add.gtree.logger <- function(u, fpathbase, logevery) {
+  gtrees <- get.GTrees()
+  gtid <- gtrees[[u]]$id
+  fpath <- paste0(fpathbase, "-", gtid, ".txt")
+  attrs <- c(id=gtreeloggerID(u), fileName=fpath, logEvery=logevery, mode="tree")
+  open.xmlnode("logger", attrs=attrs)
+  add.xmlnode("log", attrs=c(spec="beast.evolution.tree.TreeWithMetaDataLogger", tree=IDtoREF(geneTreeID.u(u))))
+  close.xmlnode()
 }
 
 
