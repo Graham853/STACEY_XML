@@ -4,7 +4,7 @@
 library(ape)
 library(hash)
 
-RcodeSourceDirectory <- "C:/Users/Work/AAA/Programming/biology/STACEY_XML2"
+RcodeSourceDirectory <- "C:/Users/Work/AAA/Programming/biology/STACEY_XML"
 
 source(paste0(RcodeSourceDirectory, "/", "analysis-structure-lib.r"))
 source(paste0(RcodeSourceDirectory, "/", "STACEYxml-lib.r"))
@@ -14,7 +14,7 @@ cat(date(),"\n")
 ###########################################################################
 
 nloci <- 3
-data.dpath <- "C:/Users/Work/AAA/Programming/biology/STACEY_XML2/Tests"
+data.dpath <- "C:/Users/Work/AAA/Programming/biology/STACEY_XML/Tests"
 beastxml.fpath  <- paste0(data.dpath, "/beast.xml")
 data.fnames <- paste0("seqs", sprintf("%02d", 1:nloci), ".nex")
 names(data.fnames) <- paste0("seq", sprintf("%02d", 1:nloci))

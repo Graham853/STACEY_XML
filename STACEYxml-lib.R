@@ -9,7 +9,7 @@ TheCurrentPath <- character(0)
 TheBEASTOutputConnection <- NULL
 
 
-xmlFile.from.analysis.structure <- function()
+xmlFile.from.analysis.structure <- function(beastxml.fpath)
 {
   # Load functions that are only needed to generate XML.
   
@@ -35,6 +35,9 @@ xmlFile.from.analysis.structure <- function()
 
   
   TheAlignmentData <<- load.data() 
+  
+  TheBEASTOutputConnection <<- file(beastxml.fpath, "w")
+  #open(TheBEASTOutputConnection)
   
   packages=paste(sep=":",
                  "beast.core",
@@ -63,6 +66,7 @@ xmlFile.from.analysis.structure <- function()
   add.xmlnode.children("map", attrs=c(name="prior"), children=c("beast.math.distributions.Prior"))
   add.run()
   close.xmlnode()
+  close(TheBEASTOutputConnection)
 
 }
 

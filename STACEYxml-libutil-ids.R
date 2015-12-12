@@ -358,13 +358,13 @@ coordinatedPruneRegraftID <- function() { "Operator.coordinatedPruneRegraft" }
 focusedScalerID <-           function() { "Operator.focusedScaler" }
 #heightsWarperID <-           function() { "Operator.heightsWarper" }
 
-popSFScalerID <-             function(scale) { paste0("Operator.popSFScaler.",            scale) }
-bdcGrowthRateScalerID <-     function(scale) { paste0("Operator.bdcGrowthScaler",         scale) }
-bdcRelDeathScalerID <-       function(scale) { paste0("Operator.bdcReldeathScaler",       scale) }
-bdcRelDeathRandWalkerID  <-  function(halfw) { paste0("Operator.bdcRelDeathRandWalker",   halfw) }
-bdcCollapseWtScalerID <-     function(scale) { paste0("Operator.bdcCollapseWtScaler",     scale) }
-bdcCollapseWtRandWalkerID <- function(halfw) { paste0("Operator.bdcCollapseWtRandWalker", halfw) }
-bdcOriginHeightScalerID <-   function(scale) { paste0("Operator.bdcOriginHtScaler",       scale) }
+popSFScalerIDroot <-             function() { "Operator.popSFScaler.s" }
+bdcGrowthRateScalerIDroot <-     function() { "Operator.bdcGrowthScaler.s" }
+bdcRelDeathScalerIDroot <-       function() { "Operator.bdcReldeathScaler.s" }
+bdcRelDeathRandWalkerIDroot  <-  function() { "Operator.bdcRelDeathRandWalker.w" }
+bdcCollapseWtScalerIDroot <-     function() { "Operator.bdcCollapseWtScaler.s" }
+bdcCollapseWtRandWalkerIDroot <- function() { "Operator.bdcCollapseWtRandWalker.w" }
+bdcOriginHeightScalerIDroot <-   function() { "Operator.bdcOriginHtScaler.s" }
 
 
 # STANDARD  for gene trees
@@ -373,7 +373,7 @@ treeScalerID <- function(g) { paste0("Operator.treeScaler.", g) }
 treeRootScalerID <- function(g) { paste0("Operator.treeRootScaler.", g) }
 upClock.downHeightsID <- function(g) { paste0("Operator.upClock.downHeights.", g) }
 
-subtreeSlideID <- function(g) { paste0("Operator.subtreeSlide.", g) }
+subtreeSlideIDroot <- function(g) { paste0("Operator.subtreeSlide.", g, ".s") }
 treeScalerID <- function(g) { paste0("Operator.treeScaler.", g) }
 wideID <- function(g) { paste0("Operator.wide.", g) }
 narrowID <- function(g) { paste0("Operator.narrow.", g) }

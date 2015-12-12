@@ -17,14 +17,15 @@ add.operators <- function(A) {
   }
   
   add.comment("stretch and squeeze everything") 
-  add.upGrowthClocks.downPopsHeights(2, "0p100", 0.1) 
-  add.upGrowthClocks.downPopsHeights(2, "0p500", 0.5) 
-  add.upGrowthClocks.downPopsHeights(2, "0p850", 0.85) 
-  add.upGrowthClocks.downPopsHeights(2, "0p900", 0.9) 
-  add.upGrowthClocks.downPopsHeights(2, "0p970", 0.97) 
-  add.upGrowthClocks.downPopsHeights(2, "0p990", 0.99) 
-  add.upGrowthClocks.downPopsHeights(2, "0p997", 0.997) 
-  add.upGrowthClocks.downPopsHeights(2, "0p999", 0.999) 
+  add.upGrowthClocks.downPopsHeights(2, "0p100", "0.100") 
+  add.upGrowthClocks.downPopsHeights(2, "0p350", "0.350") 
+  add.upGrowthClocks.downPopsHeights(2, "0p700", "0.700") 
+  add.upGrowthClocks.downPopsHeights(2, "0p900", "0.900") 
+  add.upGrowthClocks.downPopsHeights(2, "0p970", "0.970") 
+  add.upGrowthClocks.downPopsHeights(2, "0p990", "0.990") 
+  add.upGrowthClocks.downPopsHeights(2, "0p997", "0.997") 
+  add.upGrowthClocks.downPopsHeights(2, "0p999", "0.999") 
+  
   
   add.comment("Scalers for the birth-death-collapse model (hyper)parameters") 
   
@@ -32,66 +33,34 @@ add.operators <- function(A) {
   bdc.g <- get.child(bdc, "growthrate")
   bdc.rd <- get.child(bdc, "reldeath")
   bdc.w <- get.child(bdc, "w")
+  scales <- c("100", "350", "700", "900", "970", "990", "997", "999")
+  halfwidths <- c("001", "010", "030", "100", "300")
   if (is.estimated(bdc.g)) {
-    add.general.no.opt.scaleOperator(bdcGrowthRateScalerID("0p100"), bdcGrowthID(), 0.1, .4)
-    add.general.no.opt.scaleOperator(bdcGrowthRateScalerID("0p500"), bdcGrowthID(), 0.5, .4)
-    add.general.no.opt.scaleOperator(bdcGrowthRateScalerID("0p900"), bdcGrowthID(), 0.9, .4)
-    add.general.no.opt.scaleOperator(bdcGrowthRateScalerID("0p990"), bdcGrowthID(), 0.99, .4)
-    add.general.no.opt.scaleOperator(bdcGrowthRateScalerID("0p999"), bdcGrowthID(), 0.999, .4)
-  }
+    add.set.of.scaleOperators(scales, bdcGrowthRateScalerIDroot(), bdcGrowthID(), 0.3)
+    }
   if (is.estimated(bdc.rd)) {
-    add.general.no.opt.scaleOperator(bdcRelDeathScalerID("0p010"), bdcRelDeathID(), 0.01, .2)
-    add.general.no.opt.scaleOperator(bdcRelDeathScalerID("0p100"), bdcRelDeathID(), 0.1, .2)
-    add.general.no.opt.scaleOperator(bdcRelDeathScalerID("0p500"), bdcRelDeathID(), 0.5, .2)
-    add.general.no.opt.scaleOperator(bdcRelDeathScalerID("0p900"), bdcRelDeathID(), 0.9, .2)
-    add.general.no.opt.scaleOperator(bdcRelDeathScalerID("0p990"), bdcRelDeathID(), 0.99, .2)
-    
-    add.general.runifrandwalkOperator(bdcRelDeathRandWalkerID("0p0001"), bdcRelDeathID(), 0.0001,   .2)
-    add.general.runifrandwalkOperator(bdcRelDeathRandWalkerID("0p0010"), bdcRelDeathID(), 0.001,    .2)
-    add.general.runifrandwalkOperator(bdcRelDeathRandWalkerID("0p0100"), bdcRelDeathID(), 0.01,     .2)
-    add.general.runifrandwalkOperator(bdcRelDeathRandWalkerID("0p1000"), bdcRelDeathID(), 0.1,      .2)
-    add.general.runifrandwalkOperator(bdcRelDeathRandWalkerID("0p3000"), bdcRelDeathID(), 0.3,      .2)
+    add.set.of.scaleOperators(scales, bdcRelDeathScalerIDroot(), bdcRelDeathID(), 0.1)
+    add.set.of.runifrandwalkOperators(halfwidths, bdcRelDeathRandWalkerIDroot(), bdcRelDeathID(), 0.2)
   }
   if (is.estimated(bdc.w)) {
-    add.general.no.opt.scaleOperator(bdcCollapseWtScalerID("0p0001"), bdcCollapseWtID(), 0.0001, .2)
-    add.general.no.opt.scaleOperator(bdcCollapseWtScalerID("0p0010"), bdcCollapseWtID(), 0.001, .2)
-    add.general.no.opt.scaleOperator(bdcCollapseWtScalerID("0p0100"), bdcCollapseWtID(), 0.01, .2)
-    add.general.no.opt.scaleOperator(bdcCollapseWtScalerID("0p1000"), bdcCollapseWtID(), 0.1, .2)
-    add.general.no.opt.scaleOperator(bdcCollapseWtScalerID("0p5000"), bdcCollapseWtID(), 0.5, .2)
-    add.general.no.opt.scaleOperator(bdcCollapseWtScalerID("0p9000"), bdcCollapseWtID(), 0.9, .2)
-    
-    add.general.runifrandwalkOperator(bdcCollapseWtRandWalkerID("0p000001"), bdcCollapseWtID(), 0.000001, .2)
-    add.general.runifrandwalkOperator(bdcCollapseWtRandWalkerID("0p00001"), bdcCollapseWtID(), 0.00001,  .2)
-    add.general.runifrandwalkOperator(bdcCollapseWtRandWalkerID("0p0001"), bdcCollapseWtID(), 0.0001,   .2)
-    add.general.runifrandwalkOperator(bdcCollapseWtRandWalkerID("0p001"), bdcCollapseWtID(), 0.001,    .2)
-    add.general.runifrandwalkOperator(bdcCollapseWtRandWalkerID("0p010"), bdcCollapseWtID(), 0.01,     .2)
-    add.general.runifrandwalkOperator(bdcCollapseWtRandWalkerID("0p100"), bdcCollapseWtID(), 0.1,      .2)
+    add.set.of.scaleOperators(scales, bdcCollapseWtScalerIDroot(), bdcCollapseWtID(), 0.1)
+    add.set.of.runifrandwalkOperators(halfwidths, bdcCollapseWtRandWalkerIDroot(), bdcCollapseWtID(), 0.2)
   }
   
   add.comment("Scalers for smcTree model (hyper)parameters") 
   
   popSF <- get.child(get.smc.coalescent(), "popSF") 
   if (is.estimated(popSF)) {
-    add.general.no.opt.scaleOperator(popSFScalerID("0p1"), popSFID(), 0.1, 1)
-    add.general.no.opt.scaleOperator(popSFScalerID("0p5"), popSFID(), 0.5, 1)
-    add.general.no.opt.scaleOperator(popSFScalerID("0p9"), popSFID(), 0.9, 1)
-    add.general.no.opt.scaleOperator(popSFScalerID("0p99"), popSFID(), 0.99, 1)
-    add.general.no.opt.scaleOperator(popSFScalerID("0p999"), popSFID(), 0.999, 1)
+    add.set.of.scaleOperators(scales, popSFScalerIDroot(), popSFID(), 0.7)
   }
+  add.set.of.scaleOperators(scales, bdcOriginHeightScalerIDroot(), bdcOriginHtID(), 0.3)
   
-  add.general.no.opt.scaleOperator(bdcOriginHeightScalerID("0p1"), bdcOriginHtID(), 0.1, .4)
-  add.general.no.opt.scaleOperator(bdcOriginHeightScalerID("0p5"), bdcOriginHtID(), 0.5, .4)
-  add.general.no.opt.scaleOperator(bdcOriginHeightScalerID("0p9"), bdcOriginHtID(), 0.9, .4)
-  add.general.no.opt.scaleOperator(bdcOriginHeightScalerID("0p99"), bdcOriginHtID(), 0.99, .4)
-  add.general.no.opt.scaleOperator(bdcOriginHeightScalerID("0p999"), bdcOriginHtID(), 0.999, .4)
-  
-  pergtreewt <- 60 / get.nof.alignments()
   add.bigcomment("Operators for the trees for each locus")
   for (g in 1:num.gtrees) {
     a <- get.GTrees.with.first.partition()[[g]]$first.partition
     if (length(TheAlignmentData$all.sequences[[a]]) > 2) { 
       add.comment(paste0("topology-changing ops for tree for locus ", g)) 
-      add.subtreeSlide(g, gtreewweight(15)) 
+      add.setof.subtreeSlide(g, gtreewweight(30)) 
       add.narrowExchange(g, gtreewweight(15)) 
       add.wideExchange(g, gtreewweight(4)) 
       add.wilsonBalding(g, gtreewweight(4)) 
@@ -216,21 +185,6 @@ add.focusedScaler <- function(wt, delay.multiplier) {
 }
 
 
-# 
-# add.heightsWarper <- function(wt) {
-#   attrs <- c(id=heightsWarperID(), spec="stacey.HeightsWarper", weight=wt)
-#   open.xmlnode("operator", attrs=attrs)
-#   add.xmlnode("smcTree", attrs=c(idref=smcTreeID()))
-#   gtrees <- get.gtrees()
-#   for (u in 1:length(gtrees)) {
-#     add.xmlnode("geneTree", attrs=c(idref=geneTreeCoalFactorID.u(u)))
-#   }
-#   close.xmlnode()
-#   
-# }
-
-
-
 
 add.general.scaleOperator <- function(ID, paramID, sfactor, weight) {
   attrs <- c(id=ID, spec="ScaleOperator", parameter=IDtoREF(paramID), scaleFactor=sfactor, weight=weight)
@@ -242,11 +196,28 @@ add.general.no.opt.scaleOperator <- function(ID, paramID, sfactor, weight) {
   add.xmlnode("operator", attrs=attrs)
 }  
 
+add.set.of.scaleOperators <- function(scales, OpIDroot, paramID, weight) {
+  for (i in 1:length(scales)) {
+    opID <- paste0(OpIDroot, scales[i])
+    scale <- sprintf("%1.3f", as.double(scales[i])/1000)
+    add.general.no.opt.scaleOperator(opID, paramID, scale, weight)
+  }
+}
+
 
 add.general.runifrandwalkOperator <- function(ID, paramID, halfwidth, weight) {
   attrs <- c(id=ID, spec="RealRandomWalkOperator", parameter=IDtoREF(paramID), windowSize=halfwidth, weight=weight)
   add.xmlnode("operator", attrs=attrs)
 }  
+
+
+add.set.of.runifrandwalkOperators <- function(halfwidths, OpIDroot, paramID, weight) {
+  for (i in 1:length(halfwidths)) {
+    opID <- paste0(OpIDroot, halfwidths[i])
+    halfwidth <- sprintf("%1.3f", as.double(halfwidths[i])/1000)
+    add.general.runifrandwalkOperator(opID, paramID, halfwidth, weight)
+  }
+}
 
 
 gtreewweight <- function(perc) {
@@ -293,10 +264,25 @@ add.upGrowthClocks.downPopsHeights <- function(wt, sf.text, sf) {
 ###################### gtree ops ###########################################
 
 
-add.subtreeSlide <- function(u, weight) {
-  add.xmlnode("operator", attrs=c(id=subtreeSlideID(u), spec="SubtreeSlide", 
-                               tree=IDtoREF(geneTreeID.u(u)), weight=weight))
+add.setof.subtreeSlide <- function(u, weight) {
+  sizes <- c("0001", "0003", "0010", "0030", "0100", "0300", "1000", "3000")
+  for (i in 1:length(sizes)) {
+    opID <- paste0(subtreeSlideIDroot(u), sizes[i])
+    size <- sprintf("%1.4f", as.double(sizes[i])/10000)
+    attrs <- c(id=opID, spec="SubtreeSlide", tree=IDtoREF(geneTreeID.u(u)),
+               size=size, optimise="false", weight=weight/2/length(sizes))
+    add.xmlnode("operator", attrs=attrs)
+  }
+  opID <- paste0(subtreeSlideIDroot(u), "default")
+  attrs <- c(id=opID, spec="SubtreeSlide", tree=IDtoREF(geneTreeID.u(u)),
+             weight=weight)
+    add.xmlnode("operator", attrs=attrs)
 }
+#public Input<Double> sizeInput = new Input<Double>("size", "size of the slide, default 1.0", 1.0);
+#public Input<Boolean> gaussianInput = new Input<Boolean>("gaussian", "Gaussian (=true=default) or uniform delta", true);
+#public Input<Boolean> optimiseInput = new Input<Boolean>("optimise", "flag to indicate that the scale factor is automatically changed in order to achieve a good acceptance rate (default true)", true);
+
+
 
 
 add.narrowExchange <- function(u, weight) {

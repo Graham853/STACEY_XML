@@ -27,6 +27,8 @@ add.coalescent.distribution <- function() {
   popSF <- get.child(smccoal, "popSF") 
   if (is.estimated(popSF)) {
     add.xmlnode("popPriorScale", attrs=c(idref=popSFID()))  
+  } else {
+    add.fixed.parameter(popSFID(), "popPriorScale", popSF$value)
   }
   ivgm <- get.child(smccoal, "invgammamix") 
   w <- get.childvalue(ivgm, "weights")
@@ -253,9 +255,7 @@ add.prior.distribution <- function() {
   if (is.estimated(popSF)) {
     add.comment("Prior for population scale factor") 
     add.1Dprior(popSF, IDtoREF(popSFID()))
-  } else {
-    add.fixed.parameter(popSFID(), "popPriorScale", popSF$value) 
-  }
+  } 
 
   add.comment("Priors for relative clock rates of partitions (if estimated)")
   clocks <- get.Clocks()
