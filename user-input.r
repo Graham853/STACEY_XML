@@ -123,7 +123,7 @@ for (i in 1:length(gtree.sitehets)) {
 
 cat(date(),"\n")
 
-cat.structure("C:/Users/Work/Desktop/TheAnalysisStructure.txt")
+#cat.structure("C:/Users/Work/Desktop/TheAnalysisStructure.txt")
 
 
 xmlFile.from.analysis.structure(beastxml.fpath)

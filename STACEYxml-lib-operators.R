@@ -1,19 +1,26 @@
 
-add.operators <- function(A) {
+add.operators <- function() {
   num.mincls <- length(get.minclusters())
   num.gtrees <- length(get.GTrees())
+  
+  wt.Reheight <- as.numeric(get.runoption("op.wt.Reheight"))
+  wt.Nudge <-    as.numeric(get.runoption("op.wt.Nudge"))
+  wt.Focused <-  as.numeric(get.runoption("op.wt.Focused"))
+  wt.Regraft <-  as.numeric(get.runoption("op.wt.Regraft"))
+  wt.BAdjust <-  as.numeric(get.runoption("op.wt.BAdjust"))
+  
   
   add.comment("Operators for both smcTree and locus trees.")
   stree.op.wt <- signif(400 / sqrt(num.gtrees), digits=3)
   delay.multiplier <- 0
-  add.staceyNodeReheight(3*stree.op.wt, delay.multiplier)
+  add.staceyNodeReheight(3*stree.op.wt*wt.Reheight, delay.multiplier)
   if (num.mincls > 2) {
-    add.ThreeBranchAdjuster(stree.op.wt, delay.multiplier)
-    add.nodesNudge(stree.op.wt, delay.multiplier)
-    add.coordinatedPruneRegraft(stree.op.wt, delay.multiplier)
+    add.ThreeBranchAdjuster(stree.op.wt*wt.BAdjust, delay.multiplier)
+    add.nodesNudge(stree.op.wt*wt.Nudge, delay.multiplier)
+    add.coordinatedPruneRegraft(stree.op.wt*wt.Regraft, delay.multiplier)
   }
   if (num.mincls > 4) {
-    add.focusedScaler(stree.op.wt, delay.multiplier)
+    add.focusedScaler(stree.op.wt*wt.Focused, delay.multiplier)
   }
   
   add.comment("stretch and squeeze everything") 
@@ -115,73 +122,83 @@ add.operators <- function(A) {
 # low level, more general functions
 
 add.staceyNodeReheight <- function(wt, delay.multiplier) {
-  dly <- as.character(as.integer(wt*delay.multiplier))
-  attrs <- c(id=nodeReheightID(), spec="stacey.StaceyNodeReheight", 
-             proportionUniform="0.05", delay=dly, weight=wt)
-  open.xmlnode("operator", attrs=attrs)
-  add.xmlnode("popSF", attrs=c(idref=popSFID()))
-  add.xmlnode("smcTree", attrs=c(idref=smcTreeID()))
-  gtrees <- get.GTrees()
-  for (u in 1:length(gtrees)) {
-    add.xmlnode("tree", attrs=c(idref=geneTreeID.u(u), name="geneTree"))
+  if (wt > 0) {
+    dly <- as.character(as.integer(wt*delay.multiplier))
+    attrs <- c(id=nodeReheightID(), spec="stacey.StaceyNodeReheight", 
+               proportionUniform="0.05", delay=dly, weight=wt)
+    open.xmlnode("operator", attrs=attrs)
+    add.xmlnode("popSF", attrs=c(idref=popSFID()))
+    add.xmlnode("smcTree", attrs=c(idref=smcTreeID()))
+    gtrees <- get.GTrees()
+    for (u in 1:length(gtrees)) {
+      add.xmlnode("tree", attrs=c(idref=geneTreeID.u(u), name="geneTree"))
+    }
+    close.xmlnode()
   }
-  close.xmlnode()
 } 
 
 
 
 add.ThreeBranchAdjuster <- function(wt, delay.multiplier) {
-  dly <- as.character(as.integer(wt*delay.multiplier))
-  attrs <- c(id=threeBranchAdjusterID(), spec="stacey.ThreeBranchAdjuster", delay=dly, weight=wt)
-  open.xmlnode("operator", attrs=attrs)
-  add.xmlnode("popSF", attrs=c(idref=popSFID()))
-  add.xmlnode("smcTree", attrs=c(idref=smcTreeID()))
-  gtrees <- get.GTrees()
-  for (u in 1:length(gtrees)) {
-    add.xmlnode("tree", attrs=c(idref=geneTreeID.u(u), name="geneTree"))
+  if (wt > 0) {
+    dly <- as.character(as.integer(wt*delay.multiplier))
+    attrs <- c(id=threeBranchAdjusterID(), spec="stacey.ThreeBranchAdjuster", delay=dly, weight=wt)
+    open.xmlnode("operator", attrs=attrs)
+    add.xmlnode("popSF", attrs=c(idref=popSFID()))
+    add.xmlnode("smcTree", attrs=c(idref=smcTreeID()))
+    gtrees <- get.GTrees()
+    for (u in 1:length(gtrees)) {
+      add.xmlnode("tree", attrs=c(idref=geneTreeID.u(u), name="geneTree"))
+    }
+    close.xmlnode()
   }
-  close.xmlnode()
 }
 
 
 
 add.nodesNudge <- function(wt, delay.multiplier) {
-  dly <- as.character(as.integer(wt*delay.multiplier))
-  attrs <- c(id=nodesNudgeID(), spec="stacey.NodesNudge", delay=dly, weight=wt)
-  open.xmlnode("operator", attrs=attrs)
-  add.xmlnode("smcTree", attrs=c(idref=smcTreeID()))
-  gtrees <- get.GTrees()
-  for (u in 1:length(gtrees)) {
-    add.xmlnode("tree", attrs=c(idref=geneTreeID.u(u), name="geneTree"))
+  if (wt > 0) {
+    dly <- as.character(as.integer(wt*delay.multiplier))
+    attrs <- c(id=nodesNudgeID(), spec="stacey.NodesNudge", delay=dly, weight=wt)
+    open.xmlnode("operator", attrs=attrs)
+    add.xmlnode("smcTree", attrs=c(idref=smcTreeID()))
+    gtrees <- get.GTrees()
+    for (u in 1:length(gtrees)) {
+      add.xmlnode("tree", attrs=c(idref=geneTreeID.u(u), name="geneTree"))
+    }
+    close.xmlnode()
   }
-  close.xmlnode()
 }
 
 
 add.coordinatedPruneRegraft <- function(wt, delay.multiplier) {
-  dly <- as.character(as.integer(wt*delay.multiplier))
-  attrs <- c(id=coordinatedPruneRegraftID(), spec="stacey.CoordinatedPruneRegraft", delay=dly, weight=wt)
-  open.xmlnode("operator", attrs=attrs)
-  add.xmlnode("smcTree", attrs=c(idref=smcTreeID()))
-  gtrees <- get.GTrees()
-  for (u in 1:length(gtrees)) {
-    add.xmlnode("tree", attrs=c(idref=geneTreeID.u(u), name="geneTree"))
+  if (wt > 0) {
+    dly <- as.character(as.integer(wt*delay.multiplier))
+    attrs <- c(id=coordinatedPruneRegraftID(), spec="stacey.CoordinatedPruneRegraft", delay=dly, weight=wt)
+    open.xmlnode("operator", attrs=attrs)
+    add.xmlnode("smcTree", attrs=c(idref=smcTreeID()))
+    gtrees <- get.GTrees()
+    for (u in 1:length(gtrees)) {
+      add.xmlnode("tree", attrs=c(idref=geneTreeID.u(u), name="geneTree"))
+    }
+    close.xmlnode()
   }
-  close.xmlnode()
-  
 }
 
 
+
 add.focusedScaler <- function(wt, delay.multiplier) {
-  dly <- as.character(as.integer(wt*delay.multiplier))
-  attrs <- c(id=focusedScalerID(), spec="stacey.FocusedNodeHeightScaler", delay=dly, weight=wt)
-  open.xmlnode("operator", attrs=attrs)
-  add.xmlnode("smcTree", attrs=c(idref=smcTreeID()))
-  gtrees <- get.GTrees()
-  for (u in 1:length(gtrees)) {
-    add.xmlnode("tree", attrs=c(idref=geneTreeID.u(u), name="geneTree"))
+  if (wt > 0) {
+    dly <- as.character(as.integer(wt*delay.multiplier))
+    attrs <- c(id=focusedScalerID(), spec="stacey.FocusedNodeHeightScaler", delay=dly, weight=wt)
+    open.xmlnode("operator", attrs=attrs)
+    add.xmlnode("smcTree", attrs=c(idref=smcTreeID()))
+    gtrees <- get.GTrees()
+    for (u in 1:length(gtrees)) {
+      add.xmlnode("tree", attrs=c(idref=geneTreeID.u(u), name="geneTree"))
+    }
+    close.xmlnode()
   }
-  close.xmlnode()
 }
 
 

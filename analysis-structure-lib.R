@@ -26,7 +26,7 @@ TheAnalysisStructureNodes <- NULL
 ThePartitionIndices <- NULL
 TheNodeHashTable <- hash()
 
-TheAnalysis <- function(id, data.dpath, alignment.table, taxa.table, run.options) {
+TheAnalysis <- function(id, data.dpath, data.fnames, taxa.table, run.options) {
   stopifnot(is.character(data.dpath))
   stopifnot(length(data.dpath)==1)
   stopifnot(is.character(data.fnames))
@@ -44,7 +44,7 @@ TheAnalysis <- function(id, data.dpath, alignment.table, taxa.table, run.options
   names(children) <- c("data.dpath", "alignment.table", "taxa.table", "run.options")
   attach.children(tas.i, children)
   
-  # The run options. 9 strings
+  # The run options. 9 standard strings
   stopifnot(is.character(run.options["sampledgtrees.fpathbase"]))
   stopifnot(is.character(run.options["sampledsmctrees.fpath"]))
   stopifnot(is.character(run.options["sampledparams.fpath"]))
@@ -54,6 +54,14 @@ TheAnalysis <- function(id, data.dpath, alignment.table, taxa.table, run.options
   stopifnot(is.character(run.options["smctree.logevery"]))
   stopifnot(is.character(run.options["gtrees.logevery"]))
   stopifnot(is.character(run.options["screen.logevery"]))
+  if (length(run.options) > 9) {
+    stopifnot(length(run.options) == 14)
+    stopifnot(is.character(run.options["op.wt.Reheight"]))
+    stopifnot(is.character(run.options["op.wt.Nudge"]))
+    stopifnot(is.character(run.options["op.wt.Focused"]))
+    stopifnot(is.character(run.options["op.wt.Regraft"]))
+    stopifnot(is.character(run.options["op.wt.BAdjust"]))
+  }
   gts.fpb <- add.leaf("sampledgtrees.fpathbase", id, run.options["sampledgtrees.fpathbase"])
   sts.fp  <- add.leaf("sampledsmctrees.fpath", id, run.options["sampledsmctrees.fpath"])
   spm.fp  <- add.leaf("sampledparams.fpath", id, run.options["sampledparams.fpath"])
@@ -63,10 +71,21 @@ TheAnalysis <- function(id, data.dpath, alignment.table, taxa.table, run.options
   smct.evry <- add.leaf("smctree.logevery", id, run.options["smctree.logevery"])
   gt.evry <- add.leaf("gtrees.logevery", id, run.options["gtrees.logevery"])
   scrn.evry <- add.leaf("screen.logevery", id, run.options["screen.logevery"])
-  children <- c(gts.fpb, sts.fp, spm.fp, ch.len, store.evry, pm.evry, smct.evry, gt.evry, scrn.evry)
-  names(children) <- c("sampledgtrees.fpathbase", "sampledsmctrees.fpath", "sampledparams.fpath",
-  										 "chainlength", "store.every",
-  										 "params.logevery", "smctree.logevery", "gtrees.logevery", "screen.logevery")
+  if (length(run.options) == 9) {
+    children <- c(gts.fpb, sts.fp, spm.fp, ch.len, store.evry, pm.evry, smct.evry, gt.evry, scrn.evry)
+  } else {
+    op.wt.H <- add.leaf("op.wt.Reheight", id, run.options["op.wt.Reheight"])
+    op.wt.N <- add.leaf("op.wt.Nudge", id, run.options["op.wt.Nudge"])
+    op.wt.F <- add.leaf("op.wt.Focused", id, run.options["op.wt.Focused"])
+    op.wt.R <- add.leaf("op.wt.Regraft", id, run.options["op.wt.Regraft"])
+    op.wt.A <- add.leaf("op.wt.BAdjust", id, run.options["op.wt.BAdjust"])
+    children <- c(gts.fpb, sts.fp, spm.fp, ch.len, store.evry, pm.evry, smct.evry, gt.evry, scrn.evry,
+                  op.wt.H, op.wt.N, op.wt.F, op.wt.R, op.wt.A)
+  }
+
+
+  
+  names(children) <- names(run.options)
   attach.children(rop.i, children)
   
   # The alignment, the main part.
@@ -128,6 +147,13 @@ TheAnalysis <- function(id, data.dpath, alignment.table, taxa.table, run.options
     names(children) <- c("SubstM", "SiteHet") 
     attach.children(stm.i, children)
   }
+}
+
+
+reset.the.analysis <- function() {
+  TheAnalysisStructureNodes <<- NULL
+  ThePartitionIndices <<- NULL
+  TheNodeHashTable <<- hash()
 }
 
 

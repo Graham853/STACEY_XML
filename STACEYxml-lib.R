@@ -6,16 +6,13 @@
 
 TheAlignmentData  <- NULL
 TheCurrentPath <- character(0)
-TheBEASTOutputConnection <- NULL
+TheBEASTOutputConnection <<- NULL
 
 
 xmlFile.from.analysis.structure <- function(beastxml.fpath)
 {
   # Load functions that are only needed to generate XML.
-  
-  
   # They are done here to hide them from user code (eg user-input.r)
-  
   source(paste0(RcodeSourceDirectory, "/", "analysis-structure-lib-find.r"))
   source(paste0(RcodeSourceDirectory, "/", "analysis-structure-lib-util.r"))
   
@@ -29,15 +26,23 @@ xmlFile.from.analysis.structure <- function(beastxml.fpath)
   source(paste0(RcodeSourceDirectory, "/", "STACEYxml-lib-init.R"))
   source(paste0(RcodeSourceDirectory, "/", "STACEYxml-lib-loggers.R"))
   source(paste0(RcodeSourceDirectory, "/", "STACEYxml-lib-operators.R"))
-  source(paste0(RcodeSourceDirectory, "/", "STACEYxml-lib-run.R"))
   source(paste0(RcodeSourceDirectory, "/", "STACEYxml-lib-state.R"))
   
-
-  
   TheAlignmentData <<- load.data() 
-  
+  cat("loaded data\n")
+  write.BEAST.XML(beastxml.fpath)
+}
+
+reset.xml.lib <- function() {
+  TheAlignmentData  <<- NULL
+  TheCurrentPath <<- character(0)
+  TheBEASTOutputConnection <<- NULL
+}
+
+
+write.BEAST.XML <- function(beastxml.fpath) {
   TheBEASTOutputConnection <<- file(beastxml.fpath, "w")
-  #open(TheBEASTOutputConnection)
+  on.exit(close(TheBEASTOutputConnection))
   
   packages=paste(sep=":",
                  "beast.core",
@@ -53,7 +58,39 @@ xmlFile.from.analysis.structure <- function(beastxml.fpath)
                  "beast.evolution.likelihood")
   attrs <- c(version="2.0", namespace=packages, beautistatus="", beautitemplate="")
   open.toplevel.xmlnode("beast", attrs)
-  add.data()
+  write.main.beast.element()
+  close.xmlnode()
+}
+
+
+write.main.beast.element <- function() {
+    add.data()
+    cat("done XML for data\n")
+    add.maps()
+  
+    open.xmlnode("run", attrs=c(id="mcmc", spec="MCMC", 
+                                chainLength=get.runoption("chainlength"), 
+                                storeEvery=get.runoption("store.every")))
+    add.hugecomment("state")
+    add.state()
+    cat("done XML for state\n")
+    add.hugecomment("init")
+    add.init()
+    cat("done XML for init\n")
+    add.hugecomment("distribution")
+    add.distribution()
+    cat("done XML for distribution\n")
+    add.hugecomment("operators")
+    add.operators()
+    cat("done XML for operators\n")
+    add.hugecomment("loggers")
+    add.loggers()
+    cat("done XML for loggers\n")
+    close.xmlnode()
+}
+    
+    
+add.maps <- function() {
   add.xmlnode.children("map", attrs=c(name="Beta"), children=c("beast.math.distributions.Beta"))
   add.xmlnode.children("map", attrs=c(name="Exponential"), children=c("beast.math.distributions.Exponential"))
   add.xmlnode.children("map", attrs=c(name="InverseGamma"), children=c("beast.math.distributions.InverseGamma"))
@@ -64,10 +101,6 @@ xmlFile.from.analysis.structure <- function(beastxml.fpath)
   add.xmlnode.children("map", attrs=c(name="OneOnX"), children=c("beast.math.distributions.OneOnX"))
   add.xmlnode.children("map", attrs=c(name="Normal"), children=c("beast.math.distributions.Normal"))
   add.xmlnode.children("map", attrs=c(name="prior"), children=c("beast.math.distributions.Prior"))
-  add.run()
-  close.xmlnode()
-  close(TheBEASTOutputConnection)
-
 }
 
 
